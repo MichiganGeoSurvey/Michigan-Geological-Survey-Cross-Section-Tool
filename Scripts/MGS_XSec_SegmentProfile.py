@@ -1,12 +1,12 @@
 """
-MGS_XSec_AllSteps.py
+MGS_XSec_SegmentProfile.py
 Description: ArcToolbox tool script to create a set of cross-sections defined by the end user.
              Specifically built for ArcGIS Pro software.
 Requirements: python, ArcGIS Pro
 Author: Matthew Bell, Michigan Geological Survey, matthew.e.bell@wmich.edu
 Date: 5/25/2023
 
-Last updated: 5/25/2023
+Last updated: 4/23/2024
 """
 
 # Import Modules
@@ -83,8 +83,8 @@ def placeEvents(inRoutes, idRteFld, eventTable, eventRteFld, fromVar, toVar, eve
     arcpy.management.MakeFeatureLayer("layer2", "layer3", "Shape_Length <> 0")
     arcpy.management.CopyFeatures("layer3", eventLay)
     descEvent = arcpy.ListFields(eventLay)
-    if "relateid" in descEvent:
-        arcpy.management.DeleteIdentical(eventLay, "relateid")
+    if "WELLID" in descEvent:
+        arcpy.management.DeleteIdentical(eventLay, "WELLID")
     else:
         pass
 
@@ -100,7 +100,7 @@ def plan2side(ZMLines, ve):
             newShapeArray = arcpy.Array()
             pntOld = newArray.next()
             while pntOld:
-                pntOld.X = float(pntOld.M)
+                pntOld.X = float(pntOld.M) + float(moveLength)
                 if elevUnits == "Meters":
                     pntOld.Y = float(pntOld.Z) * float(ve)
                 if elevUnits == "Feet":
@@ -170,6 +170,9 @@ if bdrkDEM == "":
     AddMsgAndPrint("- No bedrock surface defined, passing to next step...")
     pass
 else:
+    featExtent = os.path.join(scratchDir, "ProjectAreaExtent_BDRK")
+    testAndDelete(featExtent)
+    arcpy.ddd.RasterDomain(bdrkDEM, featExtent, "POLYGON")
     for Value in allValue:
         try:
             arcpy.AddMessage("*Analyzing {}...*".format(Value))
@@ -226,8 +229,42 @@ else:
                 cp = getCPValue(cpDir)
                 zm_line = os.path.join(scratchDir, "XSEC_{}_zm".format(Value))
                 arcpy.lr.CreateRoutes(z_line, checkField, zm_line, "LENGTH", "#", "#", cp)
-                leftAlign = arcpy.Describe(zm_line)
+
+                # Now we need to determine if the profile starts after the beginning of the line.
+                # Step 1: Erase the temporary feature layer to exclude the area inside the raster area...
+                eraseFeat = os.path.join(scratchDir,"BDRK_ERASE")
+                testAndDelete(eraseFeat)
+                arcpy.analysis.Erase(
+                    in_features="lineLayers",
+                    erase_features=featExtent,
+                    out_feature_class=eraseFeat,
+                    cluster_tolerance=None
+                )
+                singleFeat = os.path.join(scratchDir,"BDRK_ERASE_SINGLE")
+                testAndDelete(singleFeat)
+                arcpy.management.MultipartToSinglepart(
+                    in_features=eraseFeat,
+                    out_feature_class=singleFeat
+                )
+                # Step 2: Get the extent of the lines to see if the profile has been offset...
+                profileAlign = arcpy.Describe(zm_line)
                 mainLineAlign = arcpy.Describe("lineLayers")
+                geometries = arcpy.management.CopyFeatures(singleFeat,arcpy.Geometry())
+                moveLength = 0
+                for geometry in geometries:
+                    if (cpDir == "Northwest" or cpDir == "Southwest"):
+                        if (profileAlign.extent.XMin > mainLineAlign.extent.XMin and geometry.extent.XMin == mainLineAlign.extent.XMin):
+                            moveLength += float(geometry.length)
+                            AddMsgAndPrint(moveLength)
+                        else:
+                            pass
+                    else:
+                        AddMsgAndPrint(cpDir)
+                        if (profileAlign.extent.XMax < mainLineAlign.extent.XMax and geometry.extent.XMax == mainLineAlign.extent.XMax):
+                            moveLength += float(geometry.length)
+                            AddMsgAndPrint(moveLength)
+                        else:
+                            pass
         except:
             AddMsgAndPrint("ERROR 009: Failed to create bedrock surface for {}".format(Value), 2)
             raise SystemError
@@ -239,13 +276,9 @@ else:
                 where_clause="DEPTH_2_BDRK > 0",
                 invert_where_clause=None)
             bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value,buff.split(" ")[0],buff.split(" ")[1]))
-
-            arcpy.analysis.Buffer(bdrkpoints,bdrkBuff,buff,"FULL","ROUND","ALL",None,"PLANAR")
-            featExtent = os.path.join(scratchDir, "ProjectAreaExtent")
+            arcpy.analysis.Buffer(bdrkpoints, bdrkBuff, buff, "FULL", "ROUND", "ALL", None, "PLANAR")
 
             arcpy.management.CreateFeatureclass(scratchDir, "ProjectAreaExtent", "POLYGON")
-            featExtent = os.path.join(scratchDir, "ProjectAreaExtent")
-            arcpy.ddd.RasterDomain(bdrkDEM, featExtent, "POLYGON")
 
             unionBDRK = os.path.join(scratchDir, "XSEC_{}_UNION_BDRK".format(Value))
             inFeatures = [featExtent, bdrkBuff]
@@ -311,7 +344,7 @@ else:
             xsecMap.addDataFromPath(bdrkProfile)
             arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
             arcpy.management.SelectLayerByAttribute(bhPoints, "CLEAR_SELECTION")
-            arcpy.management.Delete([bdrkBuff,unionBDRK])
+            arcpy.management.Delete([bdrkBuff,unionBDRK,eraseFeat,singleFeat,bdrkConfidence])
             arcpy.management.DeleteField(lineLayer,checkField)
 
             bdrkLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(bdrkProfile))[0])[0]
@@ -355,6 +388,10 @@ else:
             raster = gwlDEM.getValue(i, 0)
             startYear = gwlDEM.getValue(i, 1)
             endYear = gwlDEM.getValue(i, 2)
+
+            featExtent = os.path.join(scratchDir, "ProjectAreaExtent_{}".format(os.path.splitext(os.path.basename(raster))[0]))
+            testAndDelete(featExtent)
+            arcpy.ddd.RasterDomain(raster, featExtent, "POLYGON")
             try:
                 arcpy.AddMessage("*Analyzing {} for {}...*".format(raster, Value))
                 arcpy.management.MakeFeatureLayer(lineLayer, "lineLayers")
@@ -411,15 +448,45 @@ else:
                     cp = getCPValue(cpDir)
                     zm_line = os.path.join(scratchDir, "XSEC_{}_zm".format(Value))
                     arcpy.lr.CreateRoutes(z_line, checkField, zm_line, "LENGTH", "#", "#", cp)
+
+                    # Now we need to determine if the profile starts after the beginning of the line.
+                    # Step 1: Erase the temporary feature layer to exclude the area inside the raster area...
+                    eraseFeat = os.path.join(scratchDir, "GWL_ERASE")
+                    testAndDelete(eraseFeat)
+                    arcpy.analysis.Erase(
+                        in_features="lineLayers",
+                        erase_features=featExtent,
+                        out_feature_class=eraseFeat,
+                        cluster_tolerance=None
+                    )
+                    singleFeat = os.path.join(scratchDir, "GWL_ERASE_SINGLE")
+                    testAndDelete(singleFeat)
+                    arcpy.management.MultipartToSinglepart(
+                        in_features=eraseFeat,
+                        out_feature_class=singleFeat
+                    )
+                    # Step 2: Get the extent of the lines to see if the profile has been offset...
+                    profileAlign = arcpy.Describe(zm_line)
+                    mainLineAlign = arcpy.Describe("lineLayers")
+                    geometries = arcpy.management.CopyFeatures(singleFeat, arcpy.Geometry())
+                    moveLength = 0
+                    for geometry in geometries:
+                        if (cpDir == "Northwest" or cpDir == "Southwest"):
+                            if (profileAlign.extent.XMin > mainLineAlign.extent.XMin or geometry.extent.XMin == mainLineAlign.extent.XMin):
+                                moveLength += float(geometry.length)
+                            else:
+                                pass
+                        else:
+                            AddMsgAndPrint(cpDir)
+                            if (profileAlign.extent.XMax < mainLineAlign.extent.XMax or geometry.extent.XMax == mainLineAlign.extent.XMax):
+                                moveLength += float(geometry.length)
+                            else:
+                                pass
             except:
                 AddMsgAndPrint("ERROR 013: Failed to create {} for XSEC {}".format(raster, Value), 2)
                 raise SystemError
 
             try:
-                arcpy.management.CreateFeatureclass(scratchDir, "ProjectAreaExtent", "POLYGON")
-                featExtent = os.path.join(scratchDir, "ProjectAreaExtent")
-                arcpy.ddd.RasterDomain(raster, featExtent, "POLYGON")
-
                 if (startYear == "All Years" or endYear == "All Years" or (startYear == "" and endYear == "")):
                     AddMsgAndPrint("    Creating the confidence zone polygon feature class...")
                     buffWW = os.path.basename(bhPoints) + "_{}{}_buff_AllYears".format(buff.split(" ")[0],buff.split(" ")[1])
@@ -533,7 +600,7 @@ else:
                 xsecMap.addDataFromPath(gwlProfile)
                 arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
                 arcpy.management.SelectLayerByAttribute(bhPoints, "CLEAR_SELECTION")
-                arcpy.management.Delete([zm_line,buffWW,unionWW,confidenceZone])
+                arcpy.management.Delete([zm_line,buffWW,unionWW,confidenceZone,singleFeat,eraseFeat])
                 arcpy.management.DeleteField(lineLayer, checkField)
 
                 gwlLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(gwlProfile))[0])[0]

@@ -224,7 +224,7 @@ def plan2side(ZMLines, ve):
             newShapeArray = arcpy.Array()
             pntOld = newArray.next()
             while pntOld:
-                pntOld.X = float(pntOld.M)
+                pntOld.X = float(pntOld.M) + float(moveLength)
                 if elevUnits == "Meters":
                     pntOld.Y = float(pntOld.Z) * float(ve)
                 if elevUnits == "Feet":
@@ -367,9 +367,10 @@ arcpy.AddMessage("CREATE DATASET FOR OUTPUTS")
 # We need to implement any custom datasets into the mixture...
 try:
     if custom == "true":
-        newBhPoints = os.path.join(scratchDir, "{}_MGS".format(os.path.splitext(os.path.basename(bhPoints))[0]))
-        newLithTable = os.path.join(scratchDir, "{}_MGS".format(os.path.splitext(os.path.basename(lithTable))[0]))
-        newScrnTable = os.path.join(scratchDir, "{}_MGS".format(os.path.splitext(os.path.basename(scrnTable))[0]))
+        newBhPoints = os.path.join(scratchDir, "{}_BH_MGS".format(os.path.splitext(os.path.basename(bhPoints))[0]))
+        newLithTable = os.path.join(scratchDir, "{}_LITH_MGS".format(os.path.splitext(os.path.basename(lithTable))[0]))
+        newScrnTable = os.path.join(scratchDir, "{}_SCRN_MGS".format(os.path.splitext(os.path.basename(scrnTable))[0]))
+
         for i in range(0, bhPointsFields.rowCount):
             relateFieldB = bhPointsFields.getValue(i, 0)
             depthDrillField = bhPointsFields.getValue(i, 1)
@@ -460,16 +461,6 @@ for Value in allValue:
         if not arcpy.Exists(outFDS):
             AddMsgAndPrint("    Making final output dataset {} in {}".format(os.path.basename(outFDS),outGDB))
             arcpy.management.CreateFeatureDataset(outGDB,os.path.basename(outFDS),unknown)
-        featExtent = os.path.join(scratchDir, "ProjectAreaExtent")
-        arcpy.management.CreateFeatureclass(scratchDir, "ProjectAreaExtent", "POLYGON")
-        demDesc = arcpy.Describe(dem)
-        coordinates = [(demDesc.extent.XMax,demDesc.extent.YMax),
-                       (demDesc.extent.XMax,demDesc.extent.YMin),
-                       (demDesc.extent.XMin,demDesc.extent.YMin),
-                       (demDesc.extent.XMin,demDesc.extent.YMax)]
-        with arcpy.da.InsertCursor(featExtent, ["SHAPE@"]) as cursor:
-            cursor.insertRow([coordinates])
-            del cursor
     except:
         AddMsgAndPrint("ERROR 001: Failed to create the feature dataset for {}".format(Value))
         raise SystemError
@@ -538,12 +529,14 @@ for Value in allValue:
     try:
         #arcpy.SetProgressor("step","Creating borehole sticks for {}...".format(Value))
         AddMsgAndPrint("    Creating borehole sticks for {}...".format(Value))
-        arcpy.management.SelectLayerByLocation(in_layer=newBhPoints,
-                                               overlap_type="WITHIN_A_DISTANCE",
-                                               select_features=zm_line,
-                                               search_distance=buff)
+        boreholeNear = arcpy.management.SelectLayerByLocation(
+            in_layer=newBhPoints,
+            overlap_type="WITHIN_A_DISTANCE",
+            select_features=zm_line,
+            search_distance=buff
+        )
         zBoreholes = "XSEC_{}_zBoreholes".format(Value)
-        arcpy.ddd.InterpolateShape(dem, newBhPoints, zBoreholes)
+        arcpy.ddd.InterpolateShape(dem, boreholeNear, zBoreholes)
         try:
             arcpy.management.AddField(zBoreholes, "zDEM", "FLOAT")
         except:
@@ -586,6 +579,18 @@ for Value in allValue:
         #createRoute_Timer(bhLines,lithRoute)
         arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
         arcpy.SetProgressorPosition()
+        arcpy.SetProgressorLabel("Selecting lithology table of wells in area...")
+        wellIds = []
+        with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
+            for row in cursor:
+                wellIds.append(row[0])
+            del row, cursor
+        routeLiths = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=newLithTable,
+            selection_type="ADD_TO_SELECTION",
+            where_clause="WELLID IN '{}'".format(wellIds),
+            invert_where_clause=None)
+        arcpy.SetProgressorPosition()
         #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
         #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
         #else:
@@ -596,7 +601,7 @@ for Value in allValue:
         arcpy.lr.MakeRouteEventLayer(
             in_routes=lithRoute,
             route_id_field="WELLID",
-            in_table=newLithTable,
+            in_table=routeLiths,
             in_event_properties=Lprop,
             out_layer="lyr2",
             add_error_field="ERROR_FIELD"
@@ -606,11 +611,19 @@ for Value in allValue:
         lithInterval = os.path.join(scratchDir, "XSEC_{}_intervalsLith".format(Value))
         testAndDelete(lithInterval)
         arcpy.SetProgressorPosition()
+        #arcpy.conversion.ExportFeatures(
+        #    in_features="lyr2",
+        #    out_features=lithInterval,
+        #)
         arcpy.conversion.ExportFeatures(
             in_features="lyr2",
-            out_features=lithInterval,
-            where_clause="LOC_ERROR <> 'ROUTE NOT FOUND'"
+            out_features=lithInterval
         )
+        with arcpy.da.UpdateCursor(lithInterval,["LOC_ERROR"]) as cursor:
+            for row in cursor:
+                if row[0] == "ROUTE NOT FOUND":
+                    cursor.deleteRow()
+            del row, cursor
         arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Formatting fields...")
         arcpy.SetProgressorPosition()
@@ -658,18 +671,30 @@ for Value in allValue:
             AddMsgAndPrint("No screens defined. Skipping step...")
             pass
         else:
+            arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
+            for well in wellIds:
+                routeScrns = arcpy.management.SelectLayerByAttribute(
+                    in_layer_or_view=newScrnTable,
+                    selection_type="ADD_TO_SELECTION",
+                    where_clause="WELLID = '{}'".format(well),
+                    invert_where_clause=None)
+            arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
             Lprop = "WELLID LINE depth_top depth_bot"
             arcpy.lr.MakeRouteEventLayer(
                 in_routes=lithRoute,
                 route_id_field="WELLID",
-                in_table=newScrnTable,
+                in_table=routeScrns,
                 in_event_properties=Lprop,
                 out_layer="lyr3",
                 add_error_field="ERROR_FIELD"
             )
             scrnsInterval = os.path.join(scratchDir, "XSEC_{}_intervalsScrns".format(Value))
             testAndDelete(scrnsInterval)
+            #arcpy.conversion.ExportFeatures(
+            #    in_features="lyr3",
+            #    out_features=scrnsInterval
+            #)
             arcpy.conversion.ExportFeatures(
                 in_features="lyr3",
                 out_features=scrnsInterval,
@@ -712,12 +737,15 @@ for Value in allValue:
             arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable])
         else:
             arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval])
+            arcpy.management.SelectLayerByAttribute(newScrnTable, "CLEAR_SELECTION")
         arcpy.management.DeleteField(lineLayer, checkField)
+        arcpy.management.SelectLayerByAttribute(newLithTable, "CLEAR_SELECTION")
         xsecMap.addDataFromPath(finalLith)
         if scrnTable == "":
             pass
         else:
             xsecMap.addDataFromPath(finalScrns)
+        # *Importing a custom layer file was not applying to final dataset. Omit for now.*
         #try:
         #    if wellSymbols == "":
         #        xsecMap.addDataFromPath(finalLith)
@@ -762,6 +790,9 @@ for Value in allValue:
 
 arcpy.AddMessage('_____________________________')
 arcpy.AddMessage("BEGIN DEM TOPOGRAPHIC SURFACE CREATION")
+featExtent = os.path.join(scratchDir, "ProjectAreaExtent_TOPO")
+testAndDelete(featExtent)
+arcpy.ddd.RasterDomain(dem, featExtent, "POLYGON")
 for Value in allValue:
     try:
         arcpy.AddMessage("*Analyzing {}...*".format(Value))
@@ -899,6 +930,9 @@ if bdrkDEM == "":
     AddMsgAndPrint("- No bedrock surface defined, passing to next step...")
     pass
 else:
+    featExtent = os.path.join(scratchDir, "ProjectAreaExtent_BDRK")
+    testAndDelete(featExtent)
+    arcpy.ddd.RasterDomain(bdrkDEM, featExtent, "POLYGON")
     for Value in allValue:
         try:
             arcpy.AddMessage("*Analyzing {}...*".format(Value))
@@ -955,6 +989,40 @@ else:
                 cp = getCPValue(cpDir)
                 zm_line = os.path.join(scratchDir, "XSEC_{}_zm".format(Value))
                 arcpy.lr.CreateRoutes(z_line, checkField, zm_line, "LENGTH", "#", "#", cp)
+
+                # Now we need to determine if the profile starts after the beginning of the line.
+                # Step 1: Erase the temporary feature layer to exclude the area inside the raster area...
+                eraseFeat = os.path.join(scratchDir, "BDRK_ERASE")
+                testAndDelete(eraseFeat)
+                arcpy.analysis.Erase(
+                    in_features="lineLayers",
+                    erase_features=featExtent,
+                    out_feature_class=eraseFeat,
+                    cluster_tolerance=None
+                )
+                singleFeat = os.path.join(scratchDir, "BDRK_ERASE_SINGLE")
+                testAndDelete(singleFeat)
+                arcpy.management.MultipartToSinglepart(
+                    in_features=eraseFeat,
+                    out_feature_class=singleFeat
+                )
+                # Step 2: Get the extent of the lines to see if the profile has been offset...
+                profileAlign = arcpy.Describe(zm_line)
+                mainLineAlign = arcpy.Describe("lineLayers")
+                geometries = arcpy.management.CopyFeatures(singleFeat, arcpy.Geometry())
+                moveLength = 0
+                for geometry in geometries:
+                    if (cpDir == "Northwest" or cpDir == "Southwest"):
+                        if (profileAlign.extent.XMin > mainLineAlign.extent.XMin or geometry.extent.XMin == mainLineAlign.extent.XMin):
+                            moveLength += float(geometry.length)
+                        else:
+                            pass
+                    else:
+                        AddMsgAndPrint(cpDir)
+                        if (profileAlign.extent.XMax < mainLineAlign.extent.XMax or geometry.extent.XMax == mainLineAlign.extent.XMax):
+                            moveLength += float(geometry.length)
+                        else:
+                            pass
         except:
             AddMsgAndPrint("ERROR 009: Failed to create bedrock surface for {}".format(Value), 2)
             raise SystemError
@@ -1027,7 +1095,7 @@ else:
             xsecMap.addDataFromPath(bdrkProfile)
             arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
             arcpy.management.SelectLayerByAttribute(bhPoints, "CLEAR_SELECTION")
-            arcpy.management.Delete([zm_line,bdrkBuff,unionBDRK,bdrkConfidence])
+            arcpy.management.Delete([zm_line,bdrkBuff,unionBDRK,bdrkConfidence,eraseFeat,singleFeat])
             arcpy.management.DeleteField(lineLayer,checkField)
 
             bdrkLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(bdrkProfile))[0])[0]
@@ -1071,6 +1139,11 @@ else:
             raster = gwlDEM.getValue(i, 0)
             startYear = gwlDEM.getValue(i, 1)
             endYear = gwlDEM.getValue(i, 2)
+
+            featExtent = os.path.join(scratchDir,
+                                      "ProjectAreaExtent_{}".format(os.path.splitext(os.path.basename(raster))[0]))
+            testAndDelete(featExtent)
+            arcpy.ddd.RasterDomain(raster, featExtent, "POLYGON")
             try:
                 arcpy.AddMessage("*Analyzing {} for {}...*".format(raster, Value))
                 arcpy.management.MakeFeatureLayer(lineLayer, "lineLayers")
@@ -1127,6 +1200,40 @@ else:
                     cp = getCPValue(cpDir)
                     zm_line = os.path.join(scratchDir, "XSEC_{}_zm".format(Value))
                     arcpy.lr.CreateRoutes(z_line, checkField, zm_line, "LENGTH", "#", "#", cp)
+
+                    # Now we need to determine if the profile starts after the beginning of the line.
+                    # Step 1: Erase the temporary feature layer to exclude the area inside the raster area...
+                    eraseFeat = os.path.join(scratchDir, "GWL_ERASE")
+                    testAndDelete(eraseFeat)
+                    arcpy.analysis.Erase(
+                        in_features="lineLayers",
+                        erase_features=featExtent,
+                        out_feature_class=eraseFeat,
+                        cluster_tolerance=None
+                    )
+                    singleFeat = os.path.join(scratchDir, "GWL_ERASE_SINGLE")
+                    testAndDelete(singleFeat)
+                    arcpy.management.MultipartToSinglepart(
+                        in_features=eraseFeat,
+                        out_feature_class=singleFeat
+                    )
+                    # Step 2: Get the extent of the lines to see if the profile has been offset...
+                    profileAlign = arcpy.Describe(zm_line)
+                    mainLineAlign = arcpy.Describe("lineLayers")
+                    geometries = arcpy.management.CopyFeatures(singleFeat, arcpy.Geometry())
+                    moveLength = 0
+                    for geometry in geometries:
+                        if (cpDir == "Northwest" or cpDir == "Southwest"):
+                            if (profileAlign.extent.XMin > mainLineAlign.extent.XMin or geometry.extent.XMin == mainLineAlign.extent.XMin):
+                                moveLength += float(geometry.length)
+                            else:
+                                pass
+                        else:
+                            AddMsgAndPrint(cpDir)
+                            if (profileAlign.extent.XMax < mainLineAlign.extent.XMax or geometry.extent.XMax == mainLineAlign.extent.XMax):
+                                moveLength += float(geometry.length)
+                            else:
+                                pass
             except:
                 AddMsgAndPrint("ERROR 013: Failed to create {} for XSEC {}".format(raster, Value), 2)
                 raise SystemError
@@ -1245,7 +1352,7 @@ else:
                 xsecMap.addDataFromPath(gwlProfile)
                 arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
                 arcpy.management.SelectLayerByAttribute(newBhPoints, "CLEAR_SELECTION")
-                arcpy.management.Delete([zm_line,buffWW,unionWW,confidenceZone])
+                arcpy.management.Delete([zm_line,buffWW,unionWW,confidenceZone,singleFeat,eraseFeat])
                 arcpy.management.DeleteField(lineLayer, checkField)
 
                 gwlLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(gwlProfile))[0])[0]
