@@ -34,7 +34,7 @@ Total Runtime: 3 Days 16 Hours
 
 **KNOWN ISSUES**
 
-The tool takes the longest on the "Segmenting Porfiles" portion but will sometimes freeze there. It may seem stuck during this phase but it can also just take a long time to move forward. Give it a half hour to 2 hours per cross-section line before cancelling and trying again.
+Both the Cross-Section (All Steps) and the (Borehole Sticks) tools take the longest on the "Segmenting Porfiles" portion but will sometimes freeze there. It may seem stuck during this phase but it can also just take a long time to move forward. Give it a half hour to 2 hours per cross-section line before cancelling and trying again.
 
 ---
 
