@@ -12,15 +12,16 @@
    6. Gridded box profile.
 5. Generate segments of the full cross-section tool as data is changed.
 
+---
+
 **IMPORTANT NOTES**
 
 The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections. Large scale projects with many cross-sections can take hours or even days to complete. This time will hopefully be reduced in the future through code optimizations and updates. 
 
+---
 
 **KNOWN ISSUES**
 
-
-Certainly, here's the revised EULA with an explicit statement about the software being free:
 
 ---
 
