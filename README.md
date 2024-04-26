@@ -13,10 +13,12 @@
 5. Generate segments of the full cross-section tool as data is changed.
 
 **IMPORTANT NOTES**
+
 The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections.
 
 **KNOWN ISSUES**
 
 
 **DISCLAIMER**
+
 This is an experimental product that was designed for specific use cases. We cannot guarantee the accuracy of the output from the tools or that they will work in all applications.
