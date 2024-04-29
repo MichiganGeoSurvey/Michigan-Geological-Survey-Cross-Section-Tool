@@ -102,16 +102,14 @@ if wellType == "All Wells":
                 for i in range(0,dateRange.rowCount):
                     startDate = dateRange.getValue(i,0)
                     endDate = dateRange.getValue(i,1)
-                    oldTime = datetime.datetime.strptime(startDate, '%m/%d/%Y')
-                    newTime = datetime.datetime.strptime(endDate, '%m/%d/%Y')
-                    beginningYear = int(oldTime.year)
-                    endingYear = int(newTime.year)
+                    beginningYear = int(startDate)
+                    endingYear = int(endDate)
 
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
                     date1 = genDate.replace(year=beginningYear).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=endingYear).strftime('%Y-%m-%d %H:%M:%S')
+                    date2 = genDate.replace(year=endingYear,month=12,day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -122,11 +120,11 @@ if wellType == "All Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}".format(
                                                      firstYear,
-                                                     secondYear-1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(date[0],
+                        where_clause="CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(date[0],
                                                                                                          date[1]),
                         invert_where_clause=None)
                     createGWLraster(points=selectWells,
@@ -164,8 +162,16 @@ if wellType == "All Wells":
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
-                    date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=year2).strftime('%Y-%m-%d %H:%M:%S')
+                    if i == beginningYear:
+                        date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                        date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        if genDate.replace(year=year1,month=12,day=31).strftime('%Y-%m-%d %H:%M:%S') in dateInterval[-1][1]:
+                            date1 = genDate.replace(year=year1 + 1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -176,11 +182,11 @@ if wellType == "All Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}".format(
                                                      firstYear,
-                                                     secondYear - 1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(date[0],
+                        where_clause="CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(date[0],
                                                                                                          date[1]),
                         invert_where_clause=None)
                     createGWLraster(points=selectWells, outraster=rasterProject, boundary=featExtent)
@@ -209,16 +215,14 @@ elif wellType == "Bedrock Wells":
                 for i in range(0, dateRange.rowCount):
                     startDate = dateRange.getValue(i, 0)
                     endDate = dateRange.getValue(i, 1)
-                    oldTime = datetime.datetime.strptime(startDate, '%m/%d/%Y')
-                    newTime = datetime.datetime.strptime(endDate, '%m/%d/%Y')
-                    beginningYear = int(oldTime.year)
-                    endingYear = int(newTime.year)
+                    beginningYear = int(startDate)
+                    endingYear = int(endDate)
 
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
                     date1 = genDate.replace(year=beginningYear).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=endingYear).strftime('%Y-%m-%d %H:%M:%S')
+                    date2 = genDate.replace(year=endingYear,month=12,day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -229,11 +233,11 @@ elif wellType == "Bedrock Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}_BDRK".format(
                                                      firstYear,
-                                                     secondYear - 1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="AQ_TYPE = 'ROCK' And CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(
+                        where_clause="AQ_TYPE = 'ROCK' And CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(
                             date[0], date[1]),
                         invert_where_clause=None)
                     createGWLraster(points=selectWells,
@@ -276,8 +280,17 @@ elif wellType == "Bedrock Wells":
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
-                    date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=year2).strftime('%Y-%m-%d %H:%M:%S')
+                    if i == beginningYear:
+                        date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                        date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        if genDate.replace(year=year1, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S') in \
+                                dateInterval[-1][1]:
+                            date1 = genDate.replace(year=year1 + 1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -288,11 +301,11 @@ elif wellType == "Bedrock Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}_BDRK".format(
                                                      firstYear,
-                                                     secondYear - 1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="AQ_TYPE = 'ROCK' And CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(date[0],
+                        where_clause="AQ_TYPE = 'ROCK' And CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(date[0],
                                                                                                            date[1]),
                         invert_where_clause=None)
                     createGWLraster(points=selectWells, outraster=rasterProject, boundary=featExtent)
@@ -321,16 +334,14 @@ elif wellType == "Drift Wells":
                 for i in range(0, dateRange.rowCount):
                     startDate = dateRange.getValue(i, 0)
                     endDate = dateRange.getValue(i, 1)
-                    oldTime = datetime.datetime.strptime(startDate, '%m/%d/%Y')
-                    newTime = datetime.datetime.strptime(endDate, '%m/%d/%Y')
-                    beginningYear = int(oldTime.year)
-                    endingYear = int(newTime.year)
+                    beginningYear = int(startDate)
+                    endingYear = int(endDate)
 
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
                     date1 = genDate.replace(year=beginningYear).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=endingYear).strftime('%Y-%m-%d %H:%M:%S')
+                    date2 = genDate.replace(year=endingYear,month=12,day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -341,11 +352,11 @@ elif wellType == "Drift Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}_DRIFT".format(
                                                      firstYear,
-                                                     secondYear - 1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="AQ_TYPE = 'DRIFT' And CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(
+                        where_clause="AQ_TYPE = 'DRIFT' And CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(
                             date[0], date[1]),
                         invert_where_clause=None)
                     createGWLraster(points=selectWells,
@@ -388,8 +399,17 @@ elif wellType == "Drift Wells":
                     # Create a generic date object. The values are not important, just that the object is created to replace with
                     # the beginning year
                     genDate = datetime.datetime(year=1900, month=1, day=1)
-                    date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
-                    date2 = genDate.replace(year=year2).strftime('%Y-%m-%d %H:%M:%S')
+                    if i == beginningYear:
+                        date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                        date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        if genDate.replace(year=year1, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S') in \
+                                dateInterval[-1][1]:
+                            date1 = genDate.replace(year=year1 + 1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
+                        else:
+                            date1 = genDate.replace(year=year1).strftime('%Y-%m-%d %H:%M:%S')
+                            date2 = genDate.replace(year=year2, month=12, day=31).strftime('%Y-%m-%d %H:%M:%S')
                     dateInterval.append([date1, date2])
                 for date in dateInterval:
                     arcpy.AddMessage("Beginning: {}, Ending: {}".format(date[0], date[1]))
@@ -400,11 +420,11 @@ elif wellType == "Drift Wells":
                     rasterProject = os.path.join(locRaster,
                                                  os.path.splitext(os.path.basename(gwlWW))[0] + "_{}_{}_DRIFT".format(
                                                      firstYear,
-                                                     secondYear - 1))
+                                                     secondYear))
                     selectWells = arcpy.management.SelectLayerByAttribute(
                         in_layer_or_view=gwlWW,
                         selection_type="NEW_SELECTION",
-                        where_clause="AQ_TYPE = 'DRIFT' And CONST_DATE >= timestamp '{}' And CONST_DATE < timestamp '{}'".format(
+                        where_clause="AQ_TYPE = 'DRIFT' And CONST_DATE >= timestamp '{}' And CONST_DATE <= timestamp '{}'".format(
                             date[0],
                             date[1]),
                         invert_where_clause=None)
