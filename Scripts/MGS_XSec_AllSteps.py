@@ -588,7 +588,7 @@ for Value in allValue:
         routeLiths = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=newLithTable,
             selection_type="ADD_TO_SELECTION",
-            where_clause="WELLID IN '{}'".format(wellIds),
+            where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
             invert_where_clause=None)
         arcpy.SetProgressorPosition()
         #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
