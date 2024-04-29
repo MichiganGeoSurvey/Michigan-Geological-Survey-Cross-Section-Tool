@@ -444,28 +444,40 @@ for Value in allValue:
         lithRoute = os.path.join(scratchDir, "XSEC_{}_bhRoutes_lith".format(Value))
         testAndDelete(lithRoute)
         arcpy.SetProgressorPosition()
-        #arcpy.SetProgressorLabel("Repairing geometry...")
-        #arcpy.management.RepairGeometry(
+        # arcpy.SetProgressorLabel("Repairing geometry...")
+        # arcpy.management.RepairGeometry(
         #    in_features=bhLines,
         #    delete_null="DELETE_NULL",
         #    validation_method="ESRI"
-        #)
+        # )
         arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Create route...")
-        #createRoute_Timer(bhLines,lithRoute)
+        # createRoute_Timer(bhLines,lithRoute)
         arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
         arcpy.SetProgressorPosition()
-        #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
+        arcpy.SetProgressorLabel("Selecting lithology table of wells in area...")
+        wellIds = []
+        with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
+            for row in cursor:
+                wellIds.append(row[0])
+            del row, cursor
+        routeLiths = arcpy.management.SelectLayerByAttribute(
+            in_layer_or_view=newLithTable,
+            selection_type="ADD_TO_SELECTION",
+            where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+            invert_where_clause=None)
+        arcpy.SetProgressorPosition()
+        # while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
         #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
-        #else:
+        # else:
         #    pass
-        #arcpy.SetProgressorPosition()
+        # arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Make route event layer...")
-        Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
+        Lprop = "WELLID LINE depth_top depth_bot"
         arcpy.lr.MakeRouteEventLayer(
             in_routes=lithRoute,
             route_id_field="WELLID",
-            in_table=newLithTable,
+            in_table=routeLiths,
             in_event_properties=Lprop,
             out_layer="lyr2",
             add_error_field="ERROR_FIELD"
@@ -475,11 +487,19 @@ for Value in allValue:
         lithInterval = os.path.join(scratchDir, "XSEC_{}_intervalsLith".format(Value))
         testAndDelete(lithInterval)
         arcpy.SetProgressorPosition()
+        # arcpy.conversion.ExportFeatures(
+        #    in_features="lyr2",
+        #    out_features=lithInterval,
+        # )
         arcpy.conversion.ExportFeatures(
             in_features="lyr2",
-            out_features=lithInterval,
-            where_clause="LOC_ERROR <> 'ROUTE NOT FOUND'"
+            out_features=lithInterval
         )
+        with arcpy.da.UpdateCursor(lithInterval, ["LOC_ERROR"]) as cursor:
+            for row in cursor:
+                if row[0] == "ROUTE NOT FOUND":
+                    cursor.deleteRow()
+            del row, cursor
         arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Formatting fields...")
         arcpy.SetProgressorPosition()
@@ -491,11 +511,12 @@ for Value in allValue:
         arcpy.SetProgressorPosition()
         arcpy.management.CalculateField(lithInterval, "Dist2Xsec", "abs(!Distance!)", "PYTHON3")
         arcpy.SetProgressorPosition()
-        arcpy.management.CalculateField(lithInterval, "PERCENT_DIST", "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
+        arcpy.management.CalculateField(lithInterval, "PERCENT_DIST",
+                                        "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
         arcpy.SetProgressorPosition()
         arcpy.management.DeleteField(lithInterval, "Distance")
         arcpy.SetProgressorPosition()
-        finalLith = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
+        finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
         testAndDelete(finalLith)
         arcpy.SetProgressorPosition()
         if stickForm == "Polygon":
