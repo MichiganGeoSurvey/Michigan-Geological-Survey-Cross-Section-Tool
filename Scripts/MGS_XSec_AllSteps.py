@@ -588,7 +588,7 @@ for Value in allValue:
         routeLiths = arcpy.management.SelectLayerByAttribute(
             in_layer_or_view=newLithTable,
             selection_type="ADD_TO_SELECTION",
-            where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+            where_clause="WELLID IN {}".format(wellIds).replace("[","(").replace("]",")"),
             invert_where_clause=None)
         arcpy.SetProgressorPosition()
         #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
@@ -672,12 +672,11 @@ for Value in allValue:
             pass
         else:
             arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
-            for well in wellIds:
-                routeScrns = arcpy.management.SelectLayerByAttribute(
-                    in_layer_or_view=newScrnTable,
-                    selection_type="ADD_TO_SELECTION",
-                    where_clause="WELLID = '{}'".format(well),
-                    invert_where_clause=None)
+            routeScrns = arcpy.management.SelectLayerByAttribute(
+                in_layer_or_view=newLithTable,
+                selection_type="ADD_TO_SELECTION",
+                where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+                invert_where_clause=None)
             arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
             Lprop = "WELLID LINE depth_top depth_bot"
@@ -734,9 +733,9 @@ for Value in allValue:
         xsecMap = prj.listMaps('XSEC_{}'.format(Value))[0]
 
         if scrnTable == "":
-            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable])
+            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, zBoreholes, bhLines,lithRoute])
         else:
-            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval])
+            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval, zBoreholes, bhLines,lithRoute])
             arcpy.management.SelectLayerByAttribute(newScrnTable, "CLEAR_SELECTION")
         arcpy.management.DeleteField(lineLayer, checkField)
         arcpy.management.SelectLayerByAttribute(newLithTable, "CLEAR_SELECTION")
@@ -909,7 +908,7 @@ for Value in allValue:
         xsecMap = prj.listMaps('XSEC_{}'.format(Value))[0]
         xsecMap.addDataFromPath(profilePath)
         del inRows, outRows
-        arcpy.management.Delete([zm_line])
+        arcpy.management.Delete([zm_line,z_line])
         arcpy.management.DeleteField(lineLayer, checkField)
         profileLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(profilePath))[0])[0]
 
@@ -1095,7 +1094,7 @@ else:
             xsecMap.addDataFromPath(bdrkProfile)
             arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
             arcpy.management.SelectLayerByAttribute(bhPoints, "CLEAR_SELECTION")
-            arcpy.management.Delete([zm_line,bdrkBuff,unionBDRK,bdrkConfidence,eraseFeat,singleFeat])
+            arcpy.management.Delete([zm_line,z_line,bdrkBuff,unionBDRK,bdrkConfidence,eraseFeat,singleFeat,conEventsTable,locatedEvents_bdrk,featExtent])
             arcpy.management.DeleteField(lineLayer,checkField)
 
             bdrkLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(bdrkProfile))[0])[0]
@@ -1352,7 +1351,7 @@ else:
                 xsecMap.addDataFromPath(gwlProfile)
                 arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
                 arcpy.management.SelectLayerByAttribute(newBhPoints, "CLEAR_SELECTION")
-                arcpy.management.Delete([zm_line,buffWW,unionWW,confidenceZone,singleFeat,eraseFeat])
+                arcpy.management.Delete([zm_line,z_line,buffWW,unionWW,confidenceZone,singleFeat,eraseFeat,locatedEvents_gwl,conEventsTable])
                 arcpy.management.DeleteField(lineLayer, checkField)
 
                 gwlLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(gwlProfile))[0])[0]
@@ -1786,7 +1785,11 @@ for Value in allValue:
         xsecMap.openView()
         prj.save()
         del inRows, labelRows
-        arcpy.management.Delete([zm_line])
+        arcpy.management.Delete([zm_line,z_line])
+        if custom == "true":
+            arcpy.management.Delete([newBhPoints,newLithTable,newScrnTable])
+        else:
+            pass
     except:
         AddMsgAndPrint("ERROR 018: Failed to clean up {}".format(os.path.basename(scratchDir)),2)
         raise SystemError

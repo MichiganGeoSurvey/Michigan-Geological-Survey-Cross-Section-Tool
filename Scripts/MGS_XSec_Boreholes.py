@@ -487,19 +487,11 @@ for Value in allValue:
         lithInterval = os.path.join(scratchDir, "XSEC_{}_intervalsLith".format(Value))
         testAndDelete(lithInterval)
         arcpy.SetProgressorPosition()
-        # arcpy.conversion.ExportFeatures(
-        #    in_features="lyr2",
-        #    out_features=lithInterval,
-        # )
         arcpy.conversion.ExportFeatures(
             in_features="lyr2",
-            out_features=lithInterval
+            out_features=lithInterval,
+            where_clause="LOC_ERROR <> 'ROUTE NOT FOUND'"
         )
-        with arcpy.da.UpdateCursor(lithInterval, ["LOC_ERROR"]) as cursor:
-            for row in cursor:
-                if row[0] == "ROUTE NOT FOUND":
-                    cursor.deleteRow()
-            del row, cursor
         arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Formatting fields...")
         arcpy.SetProgressorPosition()
@@ -511,12 +503,11 @@ for Value in allValue:
         arcpy.SetProgressorPosition()
         arcpy.management.CalculateField(lithInterval, "Dist2Xsec", "abs(!Distance!)", "PYTHON3")
         arcpy.SetProgressorPosition()
-        arcpy.management.CalculateField(lithInterval, "PERCENT_DIST",
-                                        "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
+        arcpy.management.CalculateField(lithInterval, "PERCENT_DIST", "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
         arcpy.SetProgressorPosition()
         arcpy.management.DeleteField(lithInterval, "Distance")
         arcpy.SetProgressorPosition()
-        finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
+        finalLith = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
         testAndDelete(finalLith)
         arcpy.SetProgressorPosition()
         if stickForm == "Polygon":
@@ -548,18 +539,29 @@ for Value in allValue:
             AddMsgAndPrint("No screens defined. Skipping step...")
             pass
         else:
+            arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
+            routeScrns = arcpy.management.SelectLayerByAttribute(
+                in_layer_or_view=newLithTable,
+                selection_type="ADD_TO_SELECTION",
+                where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+                invert_where_clause=None)
+            arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
-            Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
+            Lprop = "WELLID LINE depth_top depth_bot"
             arcpy.lr.MakeRouteEventLayer(
                 in_routes=lithRoute,
                 route_id_field="WELLID",
-                in_table=newScrnTable,
+                in_table=routeScrns,
                 in_event_properties=Lprop,
                 out_layer="lyr3",
                 add_error_field="ERROR_FIELD"
             )
             scrnsInterval = os.path.join(scratchDir, "XSEC_{}_intervalsScrns".format(Value))
             testAndDelete(scrnsInterval)
+            # arcpy.conversion.ExportFeatures(
+            #    in_features="lyr3",
+            #    out_features=scrnsInterval
+            # )
             arcpy.conversion.ExportFeatures(
                 in_features="lyr3",
                 out_features=scrnsInterval,
@@ -570,9 +572,11 @@ for Value in allValue:
             arcpy.env.qualifiedFieldNames = False
             arcpy.management.JoinField(scrnsInterval, "WELLID", locPoints, "WELLID", "Distance")
             arcpy.management.CalculateField(scrnsInterval, "Dist2Xsec", "abs(!Distance!)", "PYTHON3")
-            arcpy.management.CalculateField(scrnsInterval, "PERCENT_DIST", "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
-            arcpy.management.DeleteField(scrnsInterval,"Distance")
-            finalScrns = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_SCRNS_{}x".format(Value, ve))
+            arcpy.management.CalculateField(scrnsInterval, "PERCENT_DIST",
+                                            "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
+            arcpy.management.DeleteField(scrnsInterval, "Distance")
+            finalScrns = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)),
+                                      "XSEC_{}_SCRNS_{}x".format(Value, ve))
             testAndDelete(finalScrns)
             if stickForm == "Polygon":
                 arcpy.analysis.Buffer(scrnsInterval, finalScrns, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
@@ -600,9 +604,16 @@ for Value in allValue:
         xsecMap.openView()
 
         if scrnTable == "":
-            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable])
+            arcpy.management.Delete(
+                [zm_line, lithInterval, z_line, locPoints, eventTable, zBoreholes, bhLines, lithRoute])
         else:
-            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval])
+            arcpy.management.Delete(
+                [zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval, zBoreholes, bhLines, lithRoute])
+            arcpy.management.SelectLayerByAttribute(newScrnTable, "CLEAR_SELECTION")
+        if custom == "true":
+            arcpy.management.Delete([newBhPoints,newScrnTable,newScrnTable])
+        else:
+            pass
         arcpy.management.DeleteField(lineLayer, checkField)
         xsecMap.addDataFromPath(finalLith)
         if scrnTable == "":

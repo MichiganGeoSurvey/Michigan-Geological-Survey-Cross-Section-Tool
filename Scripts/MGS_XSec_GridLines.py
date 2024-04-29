@@ -517,7 +517,7 @@ for Value in allValue:
         xsecMap.defaultCamera.setExtent(arcpy.Describe(extentLyr).extent)
         prj.save()
         del inRows, labelRows
-        arcpy.management.Delete([zm_line])
+        arcpy.management.Delete([zm_line,z_line])
     except:
         AddMsgAndPrint("ERROR 018: Failed to clean up {}".format(os.path.basename(scratchDir)),2)
         raise SystemError
