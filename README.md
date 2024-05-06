@@ -22,7 +22,7 @@ We have provided a sample project created from Wellogic water well data as an ex
 
 **IMPORTANT NOTES**
 
-The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections. Large scale projects with many cross-sections can take hours or even days to complete. This time will hopefully be reduced in the future through code optimizations and updates. 
+The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections. Large scale projects with many cross-sections can take hours or even days to complete. Clipping both your water well points and lithology tables to only include the wells that you would like included within your cross-section wil significantly reduce processing time. This time will hopefully be reduced in the future through code optimizations and updates. 
 
 Example (Medium):  
 Cross-Section All Steps Tool  
@@ -35,6 +35,7 @@ Cross-Section All Steps Tool
 Area: ~1500 square miles  
 Cross-section: 58 (ranging from 6-30+ miles long)  
 Total Runtime: 3 Days 16 Hours  
+
 
 ---
 
