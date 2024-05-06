@@ -18,25 +18,17 @@
 
 The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections. Large scale projects with many cross-sections can take hours or even days to complete. This time will hopefully be reduced in the future through code optimizations and updates. 
 
-Example (Medium):
+Example (Medium):  
+Cross-Section All Steps Tool  
+Area: ~100 square miles  
+Cross Sections: 5 (ranging from 4 to 10 miles long)  
+Total Runtime: ~30 minutes to 1 hour  
 
-Cross-Section All Steps Tool
-
-Area: ~100 square miles
-
-Cross Sections: 5 (ranging from 4 to 10 miles long)
-
-Total Runtime: ~30 minutes to 1 hour
-
-Example (Very Large):
-
-Cross-Section All Steps Tool
-
-Area: ~1500 square miles
-
-Cross-section: 58 (ranging from 6-30+ miles long)
-
-Total Runtime: 3 Days 16 Hours
+Example (Very Large):  
+Cross-Section All Steps Tool  
+Area: ~1500 square miles  
+Cross-section: 58 (ranging from 6-30+ miles long)  
+Total Runtime: 3 Days 16 Hours  
 
 ---
 
