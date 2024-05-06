@@ -439,119 +439,144 @@ for Value in allValue:
         AddMsgAndPrint("ERROR 003: Failed to create the boreholes for {}".format(Value),2)
         raise SystemError
     try:
-        AddMsgAndPrint("    Segmenting {} for lithology sticks...".format(Value))
-        arcpy.SetProgressor("step", "Begin {}...".format(Value), 0, 15, 1)
-        lithRoute = os.path.join(scratchDir, "XSEC_{}_bhRoutes_lith".format(Value))
-        testAndDelete(lithRoute)
-        arcpy.SetProgressorPosition()
-        # arcpy.SetProgressorLabel("Repairing geometry...")
-        # arcpy.management.RepairGeometry(
-        #    in_features=bhLines,
-        #    delete_null="DELETE_NULL",
-        #    validation_method="ESRI"
-        # )
-        arcpy.SetProgressorPosition()
-        arcpy.SetProgressorLabel("Create route...")
-        # createRoute_Timer(bhLines,lithRoute)
-        arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
-        arcpy.SetProgressorPosition()
-        arcpy.SetProgressorLabel("Selecting lithology table of wells in area...")
-        wellIds = []
-        with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
-            for row in cursor:
-                wellIds.append(row[0])
-            del row, cursor
-        routeLiths = arcpy.management.SelectLayerByAttribute(
-            in_layer_or_view=newLithTable,
-            selection_type="ADD_TO_SELECTION",
-            where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
-            invert_where_clause=None)
-        arcpy.SetProgressorPosition()
-        # while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
-        #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
-        # else:
-        #    pass
-        # arcpy.SetProgressorPosition()
-        arcpy.SetProgressorLabel("Make route event layer...")
-        Lprop = "WELLID LINE depth_top depth_bot"
-        arcpy.lr.MakeRouteEventLayer(
-            in_routes=lithRoute,
-            route_id_field="WELLID",
-            in_table=routeLiths,
-            in_event_properties=Lprop,
-            out_layer="lyr2",
-            add_error_field="ERROR_FIELD"
-        )
-        arcpy.SetProgressorPosition()
-        arcpy.SetProgressorLabel("Exporting segments temporary layer to permanent feature class...")
-        lithInterval = os.path.join(scratchDir, "XSEC_{}_intervalsLith".format(Value))
-        testAndDelete(lithInterval)
-        arcpy.SetProgressorPosition()
-        arcpy.conversion.ExportFeatures(
-            in_features="lyr2",
-            out_features=lithInterval,
-            where_clause="LOC_ERROR <> 'ROUTE NOT FOUND'"
-        )
-        arcpy.SetProgressorPosition()
-        arcpy.SetProgressorLabel("Formatting fields...")
-        arcpy.SetProgressorPosition()
-        arcpy.management.AddField(lithInterval, "Dist2Xsec", "FLOAT")
-        arcpy.SetProgressorPosition()
-        arcpy.management.AddField(lithInterval, "PERCENT_DIST", "FLOAT")
-        arcpy.env.qualifiedFieldNames = False
-        arcpy.management.JoinField(lithInterval, "WELLID", locPoints, "WELLID", "Distance")
-        arcpy.SetProgressorPosition()
-        arcpy.management.CalculateField(lithInterval, "Dist2Xsec", "abs(!Distance!)", "PYTHON3")
-        arcpy.SetProgressorPosition()
-        arcpy.management.CalculateField(lithInterval, "PERCENT_DIST", "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
-        arcpy.SetProgressorPosition()
-        arcpy.management.DeleteField(lithInterval, "Distance")
-        arcpy.SetProgressorPosition()
-        finalLith = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
-        testAndDelete(finalLith)
-        arcpy.SetProgressorPosition()
-        if stickForm == "Polygon":
-            arcpy.SetProgressorLabel("Polygon selected. Creating buffer of sticks...")
-            arcpy.analysis.Buffer(lithInterval, finalLith, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
-            arcpy.management.DeleteField(finalLith, ["BUFF_DIST", "ORIG_FID"])
-        else:
-            arcpy.SetProgressorLabel("Copying sticks to final feature class...")
-            arcpy.management.CopyFeatures(lithInterval, finalLith)
-        if custom == "true":
-            arcpy.management.AlterField(in_table=finalLith,
-                                        field="WELLID",
-                                        new_field_name=relateFieldL)
-            arcpy.management.AlterField(in_table=finalLith,
-                                        field="DEPTH_TOP",
-                                        new_field_name=depthTopFieldL)
-            arcpy.management.AlterField(in_table=finalLith,
-                                        field="DEPTH_BOT",
-                                        new_field_name=depthBotFieldL)
-        else:
+        if lithTable == "":
+            AddMsgAndPrint("No lithology defined. Skipping step...")
             pass
-        arcpy.SetProgressorPosition()
-        arcpy.ResetProgressor()
+        else:
+            AddMsgAndPrint("    Segmenting {} for lithology sticks...".format(Value))
+            arcpy.SetProgressor("step", "Begin {}...".format(Value), 0, 15, 1)
+            lithRoute = os.path.join(scratchDir, "XSEC_{}_bhRoutes_lith".format(Value))
+            testAndDelete(lithRoute)
+            arcpy.SetProgressorPosition()
+            # arcpy.SetProgressorLabel("Repairing geometry...")
+            # arcpy.management.RepairGeometry(
+            #    in_features=bhLines,
+            #    delete_null="DELETE_NULL",
+            #    validation_method="ESRI"
+            # )
+            arcpy.SetProgressorPosition()
+            arcpy.SetProgressorLabel("Create route...")
+            # createRoute_Timer(bhLines,lithRoute)
+            arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
+            arcpy.SetProgressorPosition()
+            arcpy.SetProgressorLabel("Selecting lithology table of wells in area...")
+            wellIds = []
+            with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
+                for row in cursor:
+                    wellIds.append(row[0])
+                del row, cursor
+            routeLiths = arcpy.management.SelectLayerByAttribute(
+                in_layer_or_view=newLithTable,
+                selection_type="ADD_TO_SELECTION",
+                where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+                invert_where_clause=None)
+            arcpy.SetProgressorPosition()
+            # while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
+            #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
+            # else:
+            #    pass
+            # arcpy.SetProgressorPosition()
+            arcpy.SetProgressorLabel("Make route event layer...")
+            Lprop = "WELLID LINE depth_top depth_bot"
+            arcpy.lr.MakeRouteEventLayer(
+                in_routes=lithRoute,
+                route_id_field="WELLID",
+                in_table=routeLiths,
+                in_event_properties=Lprop,
+                out_layer="lyr2",
+                add_error_field="ERROR_FIELD"
+            )
+            arcpy.SetProgressorPosition()
+            arcpy.SetProgressorLabel("Exporting segments temporary layer to permanent feature class...")
+            lithInterval = os.path.join(scratchDir, "XSEC_{}_intervalsLith".format(Value))
+            testAndDelete(lithInterval)
+            arcpy.SetProgressorPosition()
+            # arcpy.conversion.ExportFeatures(
+            #    in_features="lyr2",
+            #    out_features=lithInterval,
+            # )
+            arcpy.conversion.ExportFeatures(
+                in_features="lyr2",
+                out_features=lithInterval
+            )
+            with arcpy.da.UpdateCursor(lithInterval, ["LOC_ERROR"]) as cursor:
+                for row in cursor:
+                    if row[0] == "ROUTE NOT FOUND":
+                        cursor.deleteRow()
+                del row, cursor
+            arcpy.SetProgressorPosition()
+            arcpy.SetProgressorLabel("Formatting fields...")
+            arcpy.SetProgressorPosition()
+            arcpy.management.AddField(lithInterval, "Dist2Xsec", "FLOAT")
+            arcpy.SetProgressorPosition()
+            arcpy.management.AddField(lithInterval, "PERCENT_DIST", "FLOAT")
+            arcpy.env.qualifiedFieldNames = False
+            arcpy.management.JoinField(lithInterval, "WELLID", locPoints, "WELLID", "Distance")
+            arcpy.SetProgressorPosition()
+            arcpy.management.CalculateField(lithInterval, "Dist2Xsec", "abs(!Distance!)", "PYTHON3")
+            arcpy.SetProgressorPosition()
+            arcpy.management.CalculateField(lithInterval, "PERCENT_DIST",
+                                            "(!Dist2Xsec!/{}) * 100".format(buff.split(" ")[0]), "PYTHON3")
+            arcpy.SetProgressorPosition()
+            arcpy.management.DeleteField(lithInterval, "Distance")
+            arcpy.SetProgressorPosition()
+            finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)),
+                                     "XSEC_{}_LITH_{}x".format(Value, ve))
+            testAndDelete(finalLith)
+            arcpy.SetProgressorPosition()
+            if stickForm == "Polygon":
+                arcpy.SetProgressorLabel("Polygon selected. Creating buffer of sticks...")
+                arcpy.analysis.Buffer(lithInterval, finalLith, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
+                arcpy.management.DeleteField(finalLith, ["BUFF_DIST", "ORIG_FID"])
+            else:
+                arcpy.SetProgressorLabel("Copying sticks to final feature class...")
+                arcpy.management.CopyFeatures(lithInterval, finalLith)
+            if custom == "true":
+                arcpy.management.AlterField(in_table=finalLith,
+                                            field="WELLID",
+                                            new_field_name=relateFieldL)
+                arcpy.management.AlterField(in_table=finalLith,
+                                            field="DEPTH_TOP",
+                                            new_field_name=depthTopFieldL)
+                arcpy.management.AlterField(in_table=finalLith,
+                                            field="DEPTH_BOT",
+                                            new_field_name=depthBotFieldL)
+            else:
+                pass
+            arcpy.SetProgressorPosition()
+            arcpy.ResetProgressor()
     except:
-        AddMsgAndPrint("ERROR 004: Failed to create lithology sticks for {}".format(Value),2)
+        AddMsgAndPrint("ERROR 004: Failed to create lithology sticks for {}".format(Value), 2)
         raise SystemError
     try:
         if scrnTable == "":
             AddMsgAndPrint("No screens defined. Skipping step...")
             pass
         else:
+            if lithTable == "":
+                lithRoute = os.path.join(scratchDir, "XSEC_{}_bhRoutes_lith".format(Value))
+                testAndDelete(lithRoute)
+                arcpy.SetProgressorPosition()
+                # arcpy.SetProgressorLabel("Repairing geometry...")
+                # arcpy.management.RepairGeometry(
+                #    in_features=bhLines,
+                #    delete_null="DELETE_NULL",
+                #    validation_method="ESRI"
+                # )
+                arcpy.SetProgressorPosition()
+                arcpy.SetProgressorLabel("Create route...")
+                # createRoute_Timer(bhLines,lithRoute)
+                arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
+            else:
+                pass
             arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
-            routeScrns = arcpy.management.SelectLayerByAttribute(
-                in_layer_or_view=newLithTable,
-                selection_type="ADD_TO_SELECTION",
-                where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
-                invert_where_clause=None)
             arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
             Lprop = "WELLID LINE depth_top depth_bot"
             arcpy.lr.MakeRouteEventLayer(
                 in_routes=lithRoute,
                 route_id_field="WELLID",
-                in_table=routeScrns,
+                in_table=scrnTable,
                 in_event_properties=Lprop,
                 out_layer="lyr3",
                 add_error_field="ERROR_FIELD"
@@ -603,19 +628,24 @@ for Value in allValue:
         xsecMap = prj.listMaps('XSEC_{}'.format(Value))[0]
         xsecMap.openView()
 
-        if scrnTable == "":
-            arcpy.management.Delete(
-                [zm_line, lithInterval, z_line, locPoints, eventTable, zBoreholes, bhLines, lithRoute])
+        if (scrnTable == "" and lithTable == ""):
+            arcpy.management.Delete([zm_line, z_line, locPoints, eventTable, zBoreholes, bhLines, lithRoute])
+        elif (scrnTable == "" and lithTable != ""):
+            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, zBoreholes, bhLines, lithRoute])
+        elif (scrnTable != "" and lithTable == ""):
+            arcpy.management.Delete([zm_line, z_line, locPoints, eventTable, scrnsInterval, zBoreholes, bhLines, lithRoute])
         else:
-            arcpy.management.Delete(
-                [zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval, zBoreholes, bhLines, lithRoute])
+            arcpy.management.Delete([zm_line, lithInterval, z_line, locPoints, eventTable, scrnsInterval, zBoreholes, bhLines, lithRoute])
             arcpy.management.SelectLayerByAttribute(newScrnTable, "CLEAR_SELECTION")
         if custom == "true":
             arcpy.management.Delete([newBhPoints,newScrnTable,newScrnTable])
         else:
             pass
         arcpy.management.DeleteField(lineLayer, checkField)
-        xsecMap.addDataFromPath(finalLith)
+        if lithTable == "":
+            pass
+        else:
+            xsecMap.addDataFromPath(finalLith)
         if scrnTable == "":
             pass
         else:
