@@ -38,17 +38,15 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - Project Creation
   Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.
 
-**ArcGIS_Pro_TrainingDocument_XSEC_ONLY_YYYYMMDD**
+**ArcGIS_Pro_TrainingDocument_XSEC_ONLY_YYYYMMDD.pdf**
 
   This is an instructional document for creating cross-sections only. Applicable for most users.
 
-**ArcGIS_Pro_TrainingDocument_WellogicData_YYYYMMDD**  
+**ArcGIS_Pro_TrainingDocument_WellogicData_YYYYMMDD.pdf**  
   
   This is an instructional document designed for creating projects out of data from the Wellogic water well database.
 
-  ---
-
-### **Templates**  
+ **Templates**  
 
   This folder incudes several formatting and symbology files for symbolizing several of the toolboxes outputs which include:
 
@@ -64,6 +62,15 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   Function: Custom coordinate system for the project creation tool. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the project that were not created using the MGS toolbox
   - ScreensSticks_UPDATED_20240125.lyrx  
   Function: Symbology for screen lines
+
+
+**README.md**  
+
+  Document outlining basic information about the tools, their limitations and an End-User License Agreement (EULA).  
+
+**LICENSE.txt**
+
+  Attribution-NonCommercial-ShareAlike 4.0 International license information applicable to all properties distributed through the MichiganGeoSurvey GitHub page.
   
 ---
 
@@ -88,7 +95,6 @@ Cross-Section All Steps Tool
 Area: ~1500 square miles  
 Cross-section: 58 (ranging from 6-30+ miles long)  
 Total Runtime: 3 Days 16 Hours  
-
 
 ---
 
