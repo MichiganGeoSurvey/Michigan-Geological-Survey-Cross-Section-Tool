@@ -33,7 +33,8 @@ Function: Converts Wellogic water well data into a usable format for the cross-s
 GWL Raster Creation  
 Function: Creates groundwater surface rasters from water well data
 Project Creation
-Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.
+Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.  
+
 ---
 
 **SAMPLE PROJECT**
