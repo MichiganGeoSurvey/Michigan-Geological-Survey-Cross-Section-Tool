@@ -20,6 +20,12 @@ We have provided a sample project created from Wellogic water well data as an ex
 
 ---
 
+**ADDITIONAL MATERIALS**
+
+Templates and training docs
+
+---
+
 **IMPORTANT NOTES**
 
 The processing time for all of the tools is directly related to the size of the project, size, and number of cross-section lines. Large projects with many cross-sections can take hours or even days to complete. Clipping both your water well points and lithology tables to only include the wells that are relevant to your cross-sections will significantly reduce processing time. This run-time issue will hopefully be reduced in the future through tool optimizations and updates. 
