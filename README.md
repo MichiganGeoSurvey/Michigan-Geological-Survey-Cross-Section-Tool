@@ -62,7 +62,7 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   Function: Symbology for borehole lines  
   - NAD_1983_Hotine_Oblique_Mercator_Azimuth_Natural_Origin.prj  
   Function: Custom coordinate system for the project creation tool. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the project that were not created using the MGS toolbox
-  - ScreensSticks_UPDATED_20240125.lyrx
+  - ScreensSticks_UPDATED_20240125.lyrx  
   Function: Symbology for screen lines
   
 ---
