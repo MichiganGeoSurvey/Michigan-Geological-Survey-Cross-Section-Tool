@@ -10,13 +10,13 @@
    4. Bedrock topography profiles.
    5. Groundwater topography profiles.
    6. Reference grid.
-5. Generate individual portions of the full cross-section tool as data changes.
+5. Generate individual portions of the full cross-section tool to make adjustments.
 
 ---
 
 ### **WHAT IS INCLUDED**
 
-MGS_XSEC_TOOLS_vX.atbx  
+**MGS_XSEC_TOOLS_vX.atbx**  
 
 ArcGIS Pro toolbox containing all available MGS custom tools which include: 
 
@@ -36,8 +36,32 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - GWL Raster Creation  
   Function: Creates groundwater surface rasters from water well data
   - Project Creation
-  Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.  
+  Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.
 
+**ArcGIS_Pro_TrainingDocument_XSEC_ONLY_YYYYMMDD**
+
+  This is an instructional document for creating cross-sections only. Applicable for most users.
+
+**ArcGIS_Pro_TrainingDocument_WellogicData_YYYYMMDD**  
+  
+  This is an instructional document designed for creating projects out of data from the Wellogic water well database.
+
+**Templates**  
+
+  This folder incudes several formatting and symbology files for symbolizing several of the toolboxes outputs which include:
+
+  - GWL Colors  
+  Function: Folder containing several symbologies for different well types and time periods of groundwater levels  
+  - Cross_Section_CoordinateSystem.prj  
+  Function: Custom coordinate system for the cross-sections. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the cross-section that were not created using the MGS toolbox  
+  - LithologyClasses_YYYYMMDD  
+  Function: Symbology for borehole polygons  
+  - LithSticks_UPDATE_YYYYMMDD  
+  Function: Symbology for borehole lines  
+  - NAD_1983_Hotine_Oblique_Mercator_Azimuth_Natural_Origin.prj  
+
+  Function: Custom coordinate system for the cross-sections. 
+  Function: Custom coordinate system for the project creation tool. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the project that were not created using the MGS toolbox
 ---
 
 ### **SAMPLE PROJECT**
