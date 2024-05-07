@@ -28,13 +28,14 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - Cross-Section Tools (Gridline Creation)  
   Function: Creates a reference grid that extends to the boundaries of the input cross-sections.  
   - Cross-Section Tools (Segment Profiles)  
-  Function: Creates surface profiles from bedrock and/or groundwater surface rasters.  
+  Function: Creates surface profiles from bedrock and/or groundwater surface rasters.
+
 *Data Formatting Tools*  
-  -Data Formatting
+  - Data Formatting
   Function: Converts Wellogic water well data into a usable format for the cross-section tools  
-  -GWL Raster Creation  
+  - GWL Raster Creation  
   Function: Creates groundwater surface rasters from water well data
-  -Project Creation
+  - Project Creation
   Function: Sets up a Wellogic water well project (MICHIGAN ONLY) around a given area to be used for maps and cross-sections.  
 
 ---
