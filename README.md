@@ -18,7 +18,7 @@
 
 MGS_XSEC_TOOLS_vX.atbx
 ArcGIS Pro toolbox containing all available MGS custom tools which include:  
-*Cross-Section Tools*  
+Cross-Section Tools  
   -Cross-Section Tools (All Steps)  
   Function: Combines all cross-section tools listed below in addition to a topographic surface profile.  
   -Cross-Section Tools (Borehole Sticks)  
@@ -27,7 +27,7 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   Function: Creates a reference grid that extends to the boundaries of the input cross-sections.  
   -Cross-Section Tools (Segment Profiles)  
   Function: Creates surface profiles from bedrock and/or groundwater surface rasters.  
-*Data Formatting Tools*  
+Data Formatting Tools  
   -Data Formatting
   Function: Converts Wellogic water well data into a usable format for the cross-section tools  
   -GWL Raster Creation  
