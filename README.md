@@ -46,6 +46,8 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   
   This is an instructional document designed for creating projects out of data from the Wellogic water well database.
 
+  ---
+
 **Templates**  
 
   This folder incudes several formatting and symbology files for symbolizing several of the toolboxes outputs which include:
@@ -54,14 +56,15 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   Function: Folder containing several symbologies for different well types and time periods of groundwater levels  
   - Cross_Section_CoordinateSystem.prj  
   Function: Custom coordinate system for the cross-sections. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the cross-section that were not created using the MGS toolbox  
-  - LithologyClasses_YYYYMMDD  
-  Function: Symbology for borehole polygons  
-  - LithSticks_UPDATE_YYYYMMDD  
+  - LithologyClasses_YYYYMMDD.xlsx  
+  Function: MGS's system for simplyfying Wellogic data into aggregated lithology classes  
+  - LithSticks_UPDATE_YYYYMMDD.lyrx  
   Function: Symbology for borehole lines  
   - NAD_1983_Hotine_Oblique_Mercator_Azimuth_Natural_Origin.prj  
-
-  Function: Custom coordinate system for the cross-sections. 
   Function: Custom coordinate system for the project creation tool. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the project that were not created using the MGS toolbox
+  - ScreensSticks_UPDATED_20240125.lyrx
+  Function: Symbology for screen lines
+  
 ---
 
 ### **SAMPLE PROJECT**
