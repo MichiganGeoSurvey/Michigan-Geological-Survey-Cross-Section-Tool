@@ -1,4 +1,4 @@
-### Michigan Geological Survey: Cross-Section Tool Box for ArcGIS Pro
+# Michigan Geological Survey: Cross-Section Tool Box for ArcGIS Pro
  The following tool was developed to automate the process of creating GIS layers for groundwater analysis, as well as provide a resource for generating cross-section views of geologic data in ArcGIS Pro. The implementation of the tools is as follows:
 1. Creates a project area from a DEM and acquires a range of Michigan specific datasets for use in maps and cross-sections (Not applicable for other states).
 2. Reformats water well datasets to be used in analyses.
@@ -14,7 +14,7 @@
 
 ---
 
-# **WHAT IS INCLUDED**
+### **WHAT IS INCLUDED**
 
 MGS_XSEC_TOOLS_vX.atbx  
 
@@ -40,13 +40,13 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
 
 ---
 
-# **SAMPLE PROJECT**
+### **SAMPLE PROJECT**
 
 We have provided a sample project created from Wellogic water well data as an example of what a completed project, the outputs, and potential layouts look like. This project was created using the Project Creation Tool and the Cross-Section Tool (All Steps). The project can be found at the Google Drive link [here](https://drive.google.com/file/d/1JNzOIs55Wu8ZSHcnO1A49oCTzS-EoyP7/view?usp=sharing) (Approximate size: 800mb)
 
 ---
 
-# **IMPORTANT NOTES**
+### **IMPORTANT NOTES**
 
 The processing time for all of the tools is directly related to the size of the project, size, and number of cross-section lines. Large projects with many cross-sections can take hours or even days to complete. Clipping both your water well points and lithology tables to only include the wells that are relevant to your cross-sections will significantly reduce processing time. This run-time issue will hopefully be reduced in the future through tool optimizations and updates. 
 
@@ -65,20 +65,20 @@ Total Runtime: 3 Days 16 Hours
 
 ---
 
-# **KNOWN ISSUES**
+### **KNOWN ISSUES**
 
 Both the Cross-Section (All Steps) and the Borehole Sticks tools take the longest on the "Segmenting Profiles" portion but will sometimes freeze there. It may seem stuck during this phase but it can also just take a long time to move forward. Give it a half hour to 2 hours per cross-section line before cancelling and trying again.
 
 ---
 
-# **SPECIAL THANKS**
+### **SPECIAL THANKS**
 
 Special thank you to Evan Thoms and the rest of USGS for providing the base work that was used to create these tools.
 Evan Thom’s [GitHub Page](https://github.com/ethoms-usgs)
 
 ---
 
-# **End-User License Agreement (EULA)**
+### **End-User License Agreement (EULA)**
 
 By using this code, you are agreeing to the following terms and conditions:
 
