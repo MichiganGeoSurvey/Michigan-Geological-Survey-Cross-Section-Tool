@@ -48,7 +48,7 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
 
   ---
 
-**Templates**  
+### **Templates**  
 
   This folder incudes several formatting and symbology files for symbolizing several of the toolboxes outputs which include:
 
