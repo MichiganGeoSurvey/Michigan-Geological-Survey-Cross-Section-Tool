@@ -57,7 +57,7 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - Cross_Section_CoordinateSystem.prj  
   Function: Custom coordinate system for the cross-sections. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the cross-section that were not created using the MGS toolbox  
   - LithologyClasses_YYYYMMDD.xlsx  
-  Function: MGS's system for simplyfying Wellogic data into aggregated lithology classes  
+  Function: MGS's system for simplyfying Wellogic data into aggregated lithology classes. This file is required for running both the *Project Creation* tool and the *Data Reformatting* tool  
   - LithSticks_UPDATE_YYYYMMDD.lyrx  
   Function: Symbology for borehole lines  
   - NAD_1983_Hotine_Oblique_Mercator_Azimuth_Natural_Origin.prj  
