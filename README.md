@@ -57,11 +57,15 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - LithologyClasses_YYYYMMDD.xlsx  
   Function: MGS's system for simplyfying Wellogic data into aggregated lithology classes. This file is required for running both the *Project Creation* tool and the *Data Reformatting* tool  
   - LithSticks_UPDATE_YYYYMMDD.lyrx  
-  Function: Symbology for borehole lines  
+  Function: Symbology for borehole lines (Polylines)
+  - LithSticks_Polygons_YYYYMMDD.lyrx  
+  Function: Symbology for borehole lines (Polygons)
   - NAD_1983_Hotine_Oblique_Mercator_Azimuth_Natural_Origin.prj  
   Function: Custom coordinate system for the project creation tool. This is hard-coded into the scripts and not required to run them but it may be necessary to add additional layers to the project that were not created using the MGS toolbox
-  - ScreensSticks_UPDATED_20240125.lyrx  
-  Function: Symbology for screen lines
+  - ScreensPolygon_YYYYMMDD.lyrx  
+  Function: Symbology for screen lines (Polygon)
+  - ScreensSticks_UPDATED_YYYYMMDD.lyrx  
+  Function: Symbology for screen lines (Polyline)
 
 
 **README.md**  
