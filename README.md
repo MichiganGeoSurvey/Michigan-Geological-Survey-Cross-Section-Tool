@@ -14,6 +14,10 @@
 
 ---
 
+**WHAT IS INCLUDED**
+
+---
+
 **SAMPLE PROJECT**
 
 We have provided a sample project created from Wellogic water well data as an example of what a completed project, the outputs, and potential layouts look like. This project was created using the Project Creation Tool and the Cross-Section Tool (All Steps). The project can be found at the Google Drive link [here](https://drive.google.com/file/d/1JNzOIs55Wu8ZSHcnO1A49oCTzS-EoyP7/view?usp=sharing) (Approximate size: 800mb)
