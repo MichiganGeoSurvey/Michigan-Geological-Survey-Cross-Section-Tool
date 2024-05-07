@@ -19,9 +19,9 @@
 MGS_XSEC_TOOLS_vX.atbx  
 ArcGIS Pro toolbox containing all available MGS custom tools which include:  
 *Cross-Section Tools*  
-  -Cross-Section Tools (All Steps)  
+ -Cross-Section Tools (All Steps)  
   Function: Combines all cross-section tools listed below in addition to a topographic surface profile.  
-  -Cross-Section Tools (Borehole Sticks)  
+ -Cross-Section Tools (Borehole Sticks)  
   Function: Creates borehole sticks and screens for cross-sections.  
   -Cross-Section Tools (Gridline Creation)  
   Function: Creates a reference grid that extends to the boundaries of the input cross-sections.  
