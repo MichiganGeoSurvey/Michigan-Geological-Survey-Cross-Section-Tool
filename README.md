@@ -1,16 +1,16 @@
 # Michigan Geological Survey: Cross-Section Tool Box for ArcGIS Pro
- The following tool has created to automate the process of creating project files for groundwater analysis, as well as provide a resource for establishing cross-sectional views of geologic data in ArcGIS Pro. The implementation of the tools is as follows:
-1. Create an analysis-ready project with all necessary datasets within Michigan (Not applicable for other states).
-2. Create analysis-ready water well datasets with complete data transformation and formatting to the standards set by the Michigan Geological Survey.
-3. Generate groundwater surface profiles based on the needs of the project.
-4. Generate full cross-section views of multiple lines utilizing:
+ The following tool was developed to automate the process of creating GIS layers for groundwater analysis, as well as provide a resource for generating cross-section views of geologic data in ArcGIS Pro. The implementation of the tools is as follows:
+1. Creates a project area from a DEM and acquires a range of Michigan specific datasets for use in maps and cross-sections (Not applicable for other states).
+2. Reformats water well datasets to be used in analyses.
+3. Generates groundwater surface profiles.
+4. Generates cross-section views of multiple lines that display the following:
    1. Borehole depths and lithologies.
    2. Screened intervals.
    3. Surface topography profiles.
    4. Bedrock topography profiles.
    5. Groundwater topography profiles.
-   6. Gridded box profile.
-5. Generate segments of the full cross-section tool as data is changed.
+   6. Reference grid.
+5. Generate individual portions of the full cross-section tool as data changes.
 
 ---
 
@@ -22,7 +22,7 @@ We have provided a sample project created from Wellogic water well data as an ex
 
 **IMPORTANT NOTES**
 
-The processing time of all of the tools is directly related to the size of the project & size/number of cross-sections. Large scale projects with many cross-sections can take hours or even days to complete. Clipping both your water well points and lithology tables to only include the wells that you would like included within your cross-section wil significantly reduce processing time. This time will hopefully be reduced in the future through code optimizations and updates. 
+The processing time for all of the tools is directly related to the size of the project, size, and number of cross-section lines. Large projects with many cross-sections can take hours or even days to complete. Clipping both your water well points and lithology tables to only include the wells that are relevant to your cross-sections will significantly reduce processing time. This run-time issue will hopefully be reduced in the future through tool optimizations and updates. 
 
 Example (Medium):  
 Cross-Section All Steps Tool  
@@ -41,13 +41,14 @@ Total Runtime: 3 Days 16 Hours
 
 **KNOWN ISSUES**
 
-Both the Cross-Section (All Steps) and the (Borehole Sticks) tools take the longest on the "Segmenting Porfiles" portion but will sometimes freeze there. It may seem stuck during this phase but it can also just take a long time to move forward. Give it a half hour to 2 hours per cross-section line before cancelling and trying again.
+Both the Cross-Section (All Steps) and the Borehole Sticks tools take the longest on the "Segmenting Profiles" portion but will sometimes freeze there. It may seem stuck during this phase but it can also just take a long time to move forward. Give it a half hour to 2 hours per cross-section line before cancelling and trying again.
 
 ---
 
 **SPECIAL THANKS**
 
 Special thank you to Evan Thoms and the rest of USGS for providing the base work that was used to create these tools.
+Evan Thom’s [GitHub Page](https://github.com/ethoms-usgs)
 
 ---
 
