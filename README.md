@@ -17,8 +17,10 @@
 # **WHAT IS INCLUDED**
 
 MGS_XSEC_TOOLS_vX.atbx  
-ArcGIS Pro toolbox containing all available MGS custom tools which include:  
-*Cross-Section Tools*  
+
+ArcGIS Pro toolbox containing all available MGS custom tools which include: 
+
+*Cross-Section Tools*
   - Cross-Section Tools (All Steps)  
   Function: Combines all cross-section tools listed below in addition to a topographic surface profile.  
   - Cross-Section Tools (Borehole Sticks)  
