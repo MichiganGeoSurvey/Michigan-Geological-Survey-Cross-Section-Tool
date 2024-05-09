@@ -597,7 +597,7 @@ for Value in allValue:
         #    pass
         #arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Make route event layer...")
-        Lprop = "WELLID LINE depth_top depth_bot"
+        Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
         arcpy.lr.MakeRouteEventLayer(
             in_routes=lithRoute,
             route_id_field="WELLID",
