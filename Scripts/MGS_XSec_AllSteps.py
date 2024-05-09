@@ -1027,14 +1027,23 @@ else:
             raise SystemError
         try:
             AddMsgAndPrint("    Creating the confidence zone polygon feature class...")
-            bdrkpoints = arcpy.management.SelectLayerByAttribute(
-                in_layer_or_view=newBhPoints,
-                selection_type="NEW_SELECTION",
-                where_clause="DEPTH_2_BDRK > 0",
-                invert_where_clause=None)
-            bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value,buff.split(" ")[0],buff.split(" ")[1]))
-
-            arcpy.analysis.Buffer(bdrkpoints,bdrkBuff,buff,"FULL","ROUND","ALL",None,"PLANAR")
+            if depthBDRKField == "":
+                bdrkArea = arcpy.management.SelectLayerByLocation(
+                    in_layer=newBhPoints,
+                    overlap_type="INTERSECT",
+                    select_features=featExtent,
+                    selection_type="NEW_SELECTION"
+                )
+                bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value, buff.split(" ")[0], buff.split(" ")[1]))
+                arcpy.analysis.Buffer(bdrkArea, bdrkBuff, buff, "FULL", "ROUND", "ALL", None, "PLANAR")
+            else:
+                bdrkpoints = arcpy.management.SelectLayerByAttribute(
+                    in_layer_or_view=newBhPoints,
+                    selection_type="NEW_SELECTION",
+                    where_clause="DEPTH_2_BDRK > 0",
+                    invert_where_clause=None)
+                bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value,buff.split(" ")[0],buff.split(" ")[1]))
+                arcpy.analysis.Buffer(bdrkpoints,bdrkBuff,buff,"FULL","ROUND","ALL",None,"PLANAR")
             unionBDRK = os.path.join(scratchDir, "XSEC_{}_UNION_BDRK".format(Value))
             inFeatures = [featExtent, bdrkBuff]
             arcpy.analysis.Union(inFeatures, unionBDRK, "ONLY_FID", None, "GAPS")
@@ -1094,7 +1103,7 @@ else:
             xsecMap.addDataFromPath(bdrkProfile)
             arcpy.management.SelectLayerByAttribute("lineLayers", "CLEAR_SELECTION")
             arcpy.management.SelectLayerByAttribute(bhPoints, "CLEAR_SELECTION")
-            arcpy.management.Delete([zm_line,z_line,bdrkBuff,unionBDRK,bdrkConfidence,eraseFeat,singleFeat,conEventsTable,locatedEvents_bdrk,featExtent])
+            arcpy.management.Delete([zm_line,z_line,bdrkBuff,unionBDRK,bdrkConfidence,eraseFeat,singleFeat,conEventsTable,locatedEvents_bdrk])
             arcpy.management.DeleteField(lineLayer,checkField)
 
             bdrkLayer = xsecMap.listLayers(os.path.splitext(os.path.basename(bdrkProfile))[0])[0]
@@ -1126,7 +1135,7 @@ else:
         except:
             AddMsgAndPrint("ERROR 012: Failed to clean up {}".format(os.path.basename(scratchDir)), 2)
             raise SystemError
-
+    arcpy.management.Delete(featExtent)
 arcpy.AddMessage('_____________________________')
 arcpy.AddMessage("BEGIN GROUNDWATER SURFACE CREATION")
 if gwlDEM == "":
