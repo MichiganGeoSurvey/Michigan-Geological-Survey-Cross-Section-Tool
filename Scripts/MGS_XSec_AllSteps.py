@@ -589,6 +589,7 @@ for Value in allValue:
             selection_type="ADD_TO_SELECTION",
             where_clause="WELLID IN {}".format(wellIds).replace("[","(").replace("]",")"),
             invert_where_clause=None)
+        arcpy.management.CopyRows(routeLiths,os.path.join(scratchDir,"XSEC_LITH"))
         arcpy.SetProgressorPosition()
         #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
         #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
@@ -600,7 +601,7 @@ for Value in allValue:
         arcpy.lr.MakeRouteEventLayer(
             in_routes=lithRoute,
             route_id_field="WELLID",
-            in_table=routeLiths,
+            in_table=os.path.join(scratchDir,"XSEC_LITH"),
             in_event_properties=Lprop,
             out_layer="lyr2",
             add_error_field="ERROR_FIELD"
@@ -638,16 +639,21 @@ for Value in allValue:
         arcpy.SetProgressorPosition()
         arcpy.management.DeleteField(lithInterval, "Distance")
         arcpy.SetProgressorPosition()
-        finalLith = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
+        finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
+        finalBore = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_BOREH_{}x".format(Value, ve))
         testAndDelete(finalLith)
+        testAndDelete(finalBore)
         arcpy.SetProgressorPosition()
         if stickForm == "Polygon":
             arcpy.SetProgressorLabel("Polygon selected. Creating buffer of sticks...")
             arcpy.analysis.Buffer(lithInterval, finalLith, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
             arcpy.management.DeleteField(finalLith, ["BUFF_DIST", "ORIG_FID"])
+            arcpy.analysis.Buffer(bhLines, finalBore, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
+            arcpy.management.DeleteField(finalBore, ["BUFF_DIST", "ORIG_FID"])
         else:
             arcpy.SetProgressorLabel("Copying sticks to final feature class...")
             arcpy.management.CopyFeatures(lithInterval, finalLith)
+            arcpy.management.CopyFeatures(bhLines, finalBore)
         if custom == "true":
             arcpy.management.AlterField(in_table=finalLith,
                                         field="WELLID",
@@ -658,6 +664,24 @@ for Value in allValue:
             arcpy.management.AlterField(in_table=finalLith,
                                         field="DEPTH_BOT",
                                         new_field_name=depthBotFieldL)
+            arcpy.management.AlterField(in_table=finalBore,
+                                        field="WELLID",
+                                        new_field_name=relateFieldB)
+            arcpy.management.AlterField(in_table=finalBore,
+                                        field="BOREH_DEPTH",
+                                        new_field_name=depthDrillField)
+            if depthBDRKField == "":
+                pass
+            else:
+                arcpy.management.AlterField(in_table=finalBore,
+                                            field="DEPTH_2_BDRK",
+                                            new_field_name=depthBDRKField)
+            if complDateField == "":
+                pass
+            else:
+                arcpy.management.AlterField(in_table=finalBore,
+                                            field="CONST_DATE",
+                                            new_field_name=complDateField)
         else:
             pass
         arcpy.SetProgressorPosition()
