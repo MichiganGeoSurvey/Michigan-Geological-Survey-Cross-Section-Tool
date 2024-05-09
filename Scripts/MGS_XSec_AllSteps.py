@@ -89,7 +89,6 @@ def removeBasemaps(map):
         map.removeLayer(basenameLayer)
         map.removeLayer(hillLayer)
     except:
-        arcpy.AddMessage('  *Basemap already removed. Passing to next step...')
         pass
 
 def add_id(out_name, field_names, out_path):
