@@ -439,6 +439,11 @@ for Value in allValue:
         AddMsgAndPrint("ERROR 003: Failed to create the boreholes for {}".format(Value),2)
         raise SystemError
     try:
+        wellIds = []
+        with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
+            for row in cursor:
+                wellIds.append(row[0])
+            del row, cursor
         if lithTable == "":
             AddMsgAndPrint("No lithology defined. Skipping step...")
             pass
@@ -460,11 +465,6 @@ for Value in allValue:
             arcpy.lr.CreateRoutes(bhLines, "WELLID", lithRoute, "ONE_FIELD", "BOREH_DEPTH", "#", "UPPER_LEFT")
             arcpy.SetProgressorPosition()
             arcpy.SetProgressorLabel("Selecting lithology table of wells in area...")
-            wellIds = []
-            with arcpy.da.SearchCursor(bhLines, ["WELLID"]) as cursor:
-                for row in cursor:
-                    wellIds.append(row[0])
-                del row, cursor
             routeLiths = arcpy.management.SelectLayerByAttribute(
                 in_layer_or_view=newLithTable,
                 selection_type="ADD_TO_SELECTION",
@@ -522,15 +522,21 @@ for Value in allValue:
             arcpy.SetProgressorPosition()
             finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)),
                                      "XSEC_{}_LITH_{}x".format(Value, ve))
+            finalBore = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)),
+                                     "XSEC_{}_BOREH_{}x".format(Value, ve))
             testAndDelete(finalLith)
+            testAndDelete(finalBore)
             arcpy.SetProgressorPosition()
             if stickForm == "Polygon":
                 arcpy.SetProgressorLabel("Polygon selected. Creating buffer of sticks...")
                 arcpy.analysis.Buffer(lithInterval, finalLith, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
                 arcpy.management.DeleteField(finalLith, ["BUFF_DIST", "ORIG_FID"])
+                arcpy.analysis.Buffer(bhLines, finalBore, "25 Unknown", "FULL", "FLAT", "NONE", None, "PLANAR")
+                arcpy.management.DeleteField(finalBore, ["BUFF_DIST", "ORIG_FID"])
             else:
                 arcpy.SetProgressorLabel("Copying sticks to final feature class...")
                 arcpy.management.CopyFeatures(lithInterval, finalLith)
+                arcpy.management.CopyFeatures(bhLines, finalBore)
             if custom == "true":
                 arcpy.management.AlterField(in_table=finalLith,
                                             field="WELLID",
@@ -541,6 +547,24 @@ for Value in allValue:
                 arcpy.management.AlterField(in_table=finalLith,
                                             field="DEPTH_BOT",
                                             new_field_name=depthBotFieldL)
+                arcpy.management.AlterField(in_table=finalBore,
+                                            field="WELLID",
+                                            new_field_name=relateFieldB)
+                arcpy.management.AlterField(in_table=finalBore,
+                                            field="BOREH_DEPTH",
+                                            new_field_name=depthDrillField)
+                if depthBDRKField == "":
+                    pass
+                else:
+                    arcpy.management.AlterField(in_table=finalBore,
+                                                field="DEPTH_2_BDRK",
+                                                new_field_name=depthBDRKField)
+                if complDateField == "":
+                    pass
+                else:
+                    arcpy.management.AlterField(in_table=finalBore,
+                                                field="CONST_DATE",
+                                                new_field_name=complDateField)
             else:
                 pass
             arcpy.SetProgressorPosition()
@@ -570,9 +594,14 @@ for Value in allValue:
             else:
                 pass
             arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
+            routeScrns = arcpy.management.SelectLayerByAttribute(
+                in_layer_or_view=newScrnTable,
+                selection_type="ADD_TO_SELECTION",
+                where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
+                invert_where_clause=None)
             arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
-            Lprop = "WELLID LINE depth_top depth_bot"
+            Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
             arcpy.lr.MakeRouteEventLayer(
                 in_routes=lithRoute,
                 route_id_field="WELLID",

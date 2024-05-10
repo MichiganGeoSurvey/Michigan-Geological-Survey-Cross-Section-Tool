@@ -2132,8 +2132,6 @@ try:
                               field_alias="Screen Top (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="SCREEN_TO", field_type="DOUBLE",
                               field_alias="Screen Bottom (ft)")
-    arcpy.management.AddField(in_table=outWWpoints, field_name="SWL", field_type="DOUBLE",
-                              field_alias="Static Water Level (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="FLOWING", field_type="TEXT", field_length=1,
                               field_alias="Artesian Well?", field_domain="Verification")
     arcpy.management.AddField(in_table=outWWpoints, field_name="AQ_TYPE", field_type="TEXT", field_length=6,
@@ -2164,6 +2162,8 @@ try:
                               field_alias="Wellogic Elevation (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="DEM_ELEV", field_type="DOUBLE",
                               field_alias="DEM Elevation (ft)")
+    arcpy.management.AddField(in_table=outWWpoints, field_name="SWL", field_type="DOUBLE",
+                              field_alias="Static Water Level (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="DEPTH_2_BDRK", field_type="DOUBLE",
                               field_alias="Depth to Top of Bedrock (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="SWL_ELEV", field_type="DOUBLE",

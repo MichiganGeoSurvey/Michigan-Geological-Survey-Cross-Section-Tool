@@ -589,19 +589,19 @@ for Value in allValue:
             selection_type="ADD_TO_SELECTION",
             where_clause="WELLID IN {}".format(wellIds).replace("[","(").replace("]",")"),
             invert_where_clause=None)
-        arcpy.management.CopyRows(routeLiths,os.path.join(scratchDir,"XSEC_LITH"))
+        arcpy.management.CopyRows(routeLiths, os.path.join(scratchDir, "XSEC_LITH"))
         arcpy.SetProgressorPosition()
-        #while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
+        # while int(arcpy.management.GetCount(lithRoute)[0]) == 0:
         #    arcpy.lr.CreateRoutes(bhLines, "relateid", lithRoute, "ONE_FIELD", "depth_drll", "#", "UPPER_LEFT")
-        #else:
+        # else:
         #    pass
-        #arcpy.SetProgressorPosition()
+        # arcpy.SetProgressorPosition()
         arcpy.SetProgressorLabel("Make route event layer...")
         Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
         arcpy.lr.MakeRouteEventLayer(
             in_routes=lithRoute,
             route_id_field="WELLID",
-            in_table=os.path.join(scratchDir,"XSEC_LITH"),
+            in_table=os.path.join(scratchDir, "XSEC_LITH"),
             in_event_properties=Lprop,
             out_layer="lyr2",
             add_error_field="ERROR_FIELD"
@@ -639,7 +639,7 @@ for Value in allValue:
         arcpy.SetProgressorPosition()
         arcpy.management.DeleteField(lithInterval, "Distance")
         arcpy.SetProgressorPosition()
-        finalLith = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
+        finalLith = os.path.join(os.path.join(outGDB,"XSEC_{}".format(Value)), "XSEC_{}_LITH_{}x".format(Value, ve))
         finalBore = os.path.join(os.path.join(outGDB, "XSEC_{}".format(Value)), "XSEC_{}_BOREH_{}x".format(Value, ve))
         testAndDelete(finalLith)
         testAndDelete(finalBore)
@@ -696,13 +696,13 @@ for Value in allValue:
         else:
             arcpy.SetProgressorLabel("Selecting screens table of wells in area...")
             routeScrns = arcpy.management.SelectLayerByAttribute(
-                in_layer_or_view=newLithTable,
+                in_layer_or_view=newScrnTable,
                 selection_type="ADD_TO_SELECTION",
                 where_clause="WELLID IN {}".format(wellIds).replace("[", "(").replace("]", ")"),
                 invert_where_clause=None)
             arcpy.SetProgressorPosition()
             AddMsgAndPrint("    Segmenting {} for screen sticks...".format(Value))
-            Lprop = "WELLID LINE depth_top depth_bot"
+            Lprop = "WELLID LINE DEPTH_TOP DEPTH_BOT"
             arcpy.lr.MakeRouteEventLayer(
                 in_routes=lithRoute,
                 route_id_field="WELLID",
@@ -1050,23 +1050,32 @@ else:
             raise SystemError
         try:
             AddMsgAndPrint("    Creating the confidence zone polygon feature class...")
-            if depthBDRKField == "":
-                bdrkArea = arcpy.management.SelectLayerByLocation(
-                    in_layer=newBhPoints,
-                    overlap_type="INTERSECT",
-                    select_features=featExtent,
-                    selection_type="NEW_SELECTION"
-                )
-                bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value, buff.split(" ")[0], buff.split(" ")[1]))
-                arcpy.analysis.Buffer(bdrkArea, bdrkBuff, buff, "FULL", "ROUND", "ALL", None, "PLANAR")
+            if custom == "true":
+                if depthBDRKField == "":
+                    bdrkArea = arcpy.management.SelectLayerByLocation(
+                        in_layer=newBhPoints,
+                        overlap_type="INTERSECT",
+                        select_features=featExtent,
+                        selection_type="NEW_SELECTION"
+                    )
+                    bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value, buff.split(" ")[0], buff.split(" ")[1]))
+                    arcpy.analysis.Buffer(bdrkArea, bdrkBuff, buff, "FULL", "ROUND", "ALL", None, "PLANAR")
+                else:
+                    bdrkpoints = arcpy.management.SelectLayerByAttribute(
+                        in_layer_or_view=newBhPoints,
+                        selection_type="NEW_SELECTION",
+                        where_clause="DEPTH_2_BDRK > 0",
+                        invert_where_clause=None)
+                    bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value,buff.split(" ")[0],buff.split(" ")[1]))
+                    arcpy.analysis.Buffer(bdrkpoints,bdrkBuff,buff,"FULL","ROUND","ALL",None,"PLANAR")
             else:
                 bdrkpoints = arcpy.management.SelectLayerByAttribute(
                     in_layer_or_view=newBhPoints,
                     selection_type="NEW_SELECTION",
                     where_clause="DEPTH_2_BDRK > 0",
                     invert_where_clause=None)
-                bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value,buff.split(" ")[0],buff.split(" ")[1]))
-                arcpy.analysis.Buffer(bdrkpoints,bdrkBuff,buff,"FULL","ROUND","ALL",None,"PLANAR")
+                bdrkBuff = os.path.join(scratchDir,"XSEC_{}_BUFF_BDRK_{}{}".format(Value, buff.split(" ")[0], buff.split(" ")[1]))
+                arcpy.analysis.Buffer(bdrkpoints, bdrkBuff, buff, "FULL", "ROUND", "ALL", None, "PLANAR")
             unionBDRK = os.path.join(scratchDir, "XSEC_{}_UNION_BDRK".format(Value))
             inFeatures = [featExtent, bdrkBuff]
             arcpy.analysis.Union(inFeatures, unionBDRK, "ONLY_FID", None, "GAPS")

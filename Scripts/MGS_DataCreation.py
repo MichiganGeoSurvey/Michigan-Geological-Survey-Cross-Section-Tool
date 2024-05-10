@@ -53,24 +53,24 @@ def firstBDRKValue(bdrkTable, origTable, relate, seq, primLith, firstBDRK):
     # Bedrock table first...
     arcpy.management.AlterField(
         in_table=bdrkStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_BDRK", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=bdrkStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_BDRK", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     # Drift Table next...
     arcpy.management.AlterField(
         in_table=drftStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_DRFT", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=drftStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_DRFT", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     # Finally, the no records or unknown table...
     arcpy.management.AlterField(
         in_table=nrcdStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_NRCD", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=nrcdStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_NRCD", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
 
     # Now, lets join all the fields together to final lithology table...
     arcpy.management.JoinField(
@@ -348,448 +348,502 @@ try:
                 pass
         else:
             pass
-    arcpy.management.CreateDomain(geologyLoc, "Color", "Accepted color terms from Wellogic","TEXT", "CODED")
-    colorDict = {"BLACK":"Black",
-                 "BLACK & GRAY":"Black & Gray",
-                 "BLUE":"Blue",
-                 "BROWN":"Brown",
-                 "CREAM": "Cream",
-                 "GRAY":"Gray",
-                 "GREEN":"Green",
-                 "ORANGE":"Orange",
-                 "PINK":"Pink",
-                 "RED":"Red",
-                 "RUST":"Rust",
-                 "TAN":"Tan",
-                 "WHITE":"White",
-                 "BLACK & WHITE":"Black & White",
-                 "DARK GRAY":"Dark Gray",
-                 "GRAY & WHITE":"Gray & White",
-                 "LIGHT BROWN":"Light Brown",
-                 "LIGHT GRAY":"Light Gray",
-                 "TAN & GRAY":"Tan & Gray",
-                 "YELLOW":"Yellow"}
-    for code in colorDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Color", code, colorDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Consistency", "Accepted consistency terms from Wellogic", "TEXT", "CODED")
-    consiDict = {"DENSE": "Dense",
-                 "DRY": "Dry",
-                 "GUMMY": "Gummy",
-                 "KARST":"Karst",
-                 "POROUS":"Porous",
-                 "STRIPS":"Strips",
-                 "CEMENTED":"Cemented",
-                 "VERY HARD":"Very Hard",
-                 "BROKEN":"Broken",
-                 "FRACTURED":"Fractured",
-                 "HEAVING/QUICK":"Heaving/Quick",
-                 "STRINGERS":"Stringers",
-                 "SWELLING":"Swelling",
-                 "WATER BEARING":"Water Bearing",
-                 "WEATHERED":"Weathered",
-                 "WET/MOIST":"Wet/Moist",
-                 "FIRM":"Firm",
-                 "HARD":"Hard",
-                 "SOFT":"Soft"}
-    for code in consiDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Consistency", code, consiDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Drilling", "Accepted drilling method terms from Wellogic", "TEXT",
-                                  "CODED")
-    drillDict = {"OTH":"Other",
-                 "AUGBOR":"Auger/Bored",
-                 "CABTOO":"Cable Tool",
-                 "CASHAM":"Casing Hammer",
-                 "DRIVEN":"Driven Hand",
-                 "HOLROD":"Hollow Rod",
-                 "JETTIN":"Jetted",
-                 "TOOHAM":"Cable Tool w/Casing Hammer",
-                 "ROTARY":"Mud Rotary",
-                 "ROTHAM":"Rotary w/Casing Hammer",
-                 "UNK":"Unknown"}
-    for code in drillDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Drilling", code, drillDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "FirstBDRK", "Definition if the unit is the first true bedrock unit in a borehole", "TEXT",
-                                  "CODED")
-    bdrkDict = {"YES":"Yes",
-                "NO":"No",
-                "NA":"Not Applicable"}
-    for code in bdrkDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "FirstBDRK", code, bdrkDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "GroupNames","Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    groupDict = {"AGR":"Archean Granite & Gneissic",
-                 "ANT":"Antrim Shale",
-                 "AUM":"Archean Ultramafic",
-                 "AVS":"Archean Volcanic & Sedimentary",
-                 "BAY":"Bayport Limestone",
-                 "BBF":"Bois Blanc Formation",
-                 "BBG":"Burnt Bluff Group",
-                 "BDG":"Badwater Greenstone",
-                 "BED":"Bedford Shale",
-                 "BER":"Berea Sandstone & Bedford Shale",
-                 "BHD":"Big Hill Dolomite",
-                 "BIF":"Bijiki Iron Formation",
-                 "BIG":"Bass Island Group",
-                 "BLS":"Bell Shale",
-                 "BRG":"Black River Group",
-                 "CHC":"Copper Harbor Conglomerate",
-                 "CHO":"Chocolay Group",
-                 "CHS":"Cabot Head Shale",
-                 "CSM":"Collingwood Shale Member",
-                 "CWT":"Coldwater Shale",
-                 "DCF":"Dunn Creek Formation",
-                 "DDL":"Dundee Limestone",
-                 "DRG":"Detroit River Group",
-                 "ELL":"Ellsworth Shale",
-                 "ENG":"Engadine Group",
-                 "EVC":"Emperor Volcanic Complex",
-                 "FSS":"Freda Sandstone",
-                 "GDQ":"Goodrich Quartzite",
-                 "GIF":"Garden Island Formation",
-                 "GLA":"Glacial Drift",
-                 "GRF":"Grand River Formation",
-                 "HEM":"Hemlock Formation",
-                 "IIF":"Ironwood Iron Formation",
-                 "INT":"Intrusive",
-                 "JAC":"Jacobsville Sandstone",
-                 "MAC":"Mackinac Breccia",
-                 "MAR":"Marshall Formation",
-                 "MCG":"Menominee & Chocolay Groups",
-                 "MGF":"Michigamme Formation",
-                 "MIF":"Michigan Formation",
-                 "MND":"Manitoulin Dolomite",
-                 "MQG":"Manistique Group",
-                 "MUN":"Munising Formation",
-                 "NIF":"Negaunee Iron Formation",
-                 "NSF":"Nonesuch Formation",
-                 "OBF":"Oak Bluff Formation",
-                 "PAC":"Point Aux Chenes Shale",
-                 "PAF":"Palms Formation",
-                 "PDC":"Prairie Du Chien Group",
-                 "PLV":"Portage Lake Volcanics",
-                 "PRG":"Paint River Group",
-                 "QUF":"Quinnesec Formation",
-                 "QUS":"Queenston Shale",
-                 "RAD":"Randville Dolomite",
-                 "RBD":"Jurassic Red Beds",
-                 "RIF":"Riverton Iron Formation",
-                 "SAG":"Saginaw Formation",
-                 "SAL":"Salina Group",
-                 "SAQ":"Siamo Slate & Ajibik Quartzite",
-                 "SCF":"Siemens Creek Formation",
-                 "SID":"Saint Ignace Dolomite",
-                 "SSS":"Sylvania Sandstone",
-                 "STF":"Stonington Formation",
-                 "SUN":"Sunbury Shale",
-                 "TMP":"Trempealeau Formation",
-                 "TRG":"Traverse Group",
-                 "TRN":"Trenton Group",
-                 "USM":"Utica Shale Member",
-                 "PSS":"Parma Sandstone",
-                 "GRG":"Grand Rapids Group",
-                 "NSS":"Napolean Sandstone",
-                 "SBL":"Squaw Bay Limestone",
-                 "ALL":"Alpena Limestone",
-                 "AMF":"Amherstburg Formation",
-                 "LUF":"Lucas Formation",
-                 "RCL":"Rogers City Limestone",
-                 "NIA":"Niagara Group",
-                 "CAG":"Cataract Group",
-                 "RIG":"Richmond Group",
-                 "GLM":"Glenwood Member",
-                 "JSS":"Jordan Sandstone",
-                 "SPS":"Saint Peter Sandstone",
-                 "LOD":"Lodi Member",
-                 "NRS":"New Richard Sandstone",
-                 "OND":"Oneota Dolomite",
-                 "SHD":"Shakopee Dolomite",
-                 "SLM":"Saint Lawrence Member",
-                 "DSS":"Dresbach Sandstone",
-                 "ECM":"Eau Claire Member",
-                 "FRS":"Franconia Sandstone",
-                 "LSG":"Lake Superior Group",
-                 "MSS":"Mount Simon Sandstone",
-                 "PRE":"Precambrian Bedrock (Undefined)",
-                 "UNK":"Unknown Group",
-                 "AMA":"Amasa Formation"}
-    for code in groupDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "GroupNames", code, groupDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "LithAgg", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    aggDict = {"UNK":"Unknown or No Record",
-               "BDRK":"Bedrock",
-               "CLAY":"Clay",
-               "CLSA":"Clay & Sand",
-               "DIAM":"Diamicton",
-               "TOPS":"Topsoil",
-               "GRAV":"Gravel",
-               "FSAN":"Fine Sand",
-               "ORGA":"Organics",
-               "SAND":"Sand",
-               "SAGR":"Sand & Gravel"}
-    for code in aggDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "LithAgg", code, aggDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "LithAquifer", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    lAQDict = {"D-AQ":"Drift: Aquifer Material",
-               "D-MAQ":"Drift: Marginal Aquifer Material",
-               "D-CM":"Drift: Confining Material",
-               "D-PCM":"Drift: Partially Confining Material",
-               "R-AQ":"Bedrock: Aquifer Material",
-               "R-MAQ":"Bedrock: Marginal Aquifer Material",
-               "R-CM":"Bedrock: Confining Material",
-               "R-PCM":"Bedrock: Partially Confining Material",
-               "D-NA":"Drift: Unknown Material",
-               "R-NA":"Bedrock: Unknown Material",
-               "U-NA":"Unknown: Unknown Material"}
-    for code in lAQDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "LithAquifer", code, lAQDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "PrimaryLith", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    primDict = {"BASALT":"Basalt",
-                "BOULDERS":"Boulders",
-                "CLAY":"Clay",
-                "CLAY & BOULDERS":"Clay & Boulders",
-                "CLAY & COBBLES":"Clay & Cobbles",
-                "CLAY & GRAVEL":"Clay & Gravel",
-                "CLAY & SAND":"Clay & Sand",
-                "CLAY & SILT":"Clay & Silt",
-                "CLAY & STONES":"Clay & Stones",
-                "CLAY GRAVEL SAND":"Clay Gravel Sand",
-                "CLAY GRAVEL SILT":"Clay Gravel Silt",
-                "CLAY GRAVEL STONES":"Clay Gravel Stones",
-                "CLAY SAND GRAVEL":"Clay Sand Gravel",
-                "CLAY SAND SILT":"Clay Sand Silt",
-                "CLAY SILT GRAVEL":"Clay Silt Gravel",
-                "CLAY SILT SAND":"Clay Silt Sand",
-                "COAL":"Coal",
-                "COBBLES":"Cobbles",
-                "CONGLOMERATE":"Conglomerate",
-                "DEBRIS":"Debris",
-                "DOLOMITE":"Dolomite",
-                "DOLOMITE & LIMESTONE":"Dolomite & Limestone",
-                "DOLOMITE & SANDSTONE":"Dolomite & Sandstone",
-                "DOLOMITE & SHALE":"Dolomite & Shale",
-                "DRY HOLE":"Dry Hole",
-                "GRANITE":"Granite",
-                "GRAVEL":"Gravel",
-                "GRAVEL & BOULDERS":"Gravel & Boulders",
-                "GRAVEL & CLAY":"Gravel & Clay",
-                "GRAVEL & COBBLES":"Gravel & Cobbles",
-                "GRAVEL & SAND":"Gravel & Sand",
-                "GRAVEL & SILT":"Gravel & Silt",
-                "GRAVEL & STONES":"Gravel & Stones",
-                "GRAVEL CLAY SAND":"Gravel Clay Sand",
-                "GRAVEL CLAY SILT":"Gravel Clay Silt",
-                "GRAVEL SAND CLAY":"Gravel Sand Clay",
-                "GRAVEL SAND SILT":"Gravel Sand Silt",
-                "GRAVEL SILT CLAY":"Gravel Silt Clay",
-                "GRAVEL SILT SAND":"Gravel Silt Sand",
-                "GREENSTONE":"Greenstone",
-                "GYPSUM":"Gypsum",
-                "HARDPAN":"Hardpan",
-                "INTERVAL NOT SAMPLED":"Interval Not Sampled",
-                "IRON FORMATION":"Iron Formation",
-                "LIMESTONE":"Limestone",
-                "LIMESTONE & DOLOMITE":"Limestone & Dolomite",
-                "LIMESTONE & SANDSTONE":"Limestone & Sandstone",
-                "LIMESTONE & SHALE":"Limestone & Shale",
-                "LITHOLOGY UNKNOWN":"Lithology Unknown",
-                "LOAM":"Loam",
-                "MARL":"Marl",
-                "MUCK":"Muck",
-                "MUD":"Mud",
-                "NO LITHOLOGY INFORMATION":"No Lithology Information",
-                "NO LOG":"No Log",
-                "PEAT":"Peat",
-                "QUARTZ":"Quartz",
-                "QUARTZITE":"Quartzite",
-                "SAND":"Sand",
-                "SAND & BOULDERS":"Sand & Boulders",
-                "SAND & CLAY":"Sand & Clay",
-                "SAND & COBBLES":"Sand & Cobbles",
-                "SAND & GRAVEL":"Sand & Gravel",
-                "SAND & SILT":"Sand & Silt",
-                "SAND & STONES":"Sand & Stones",
-                "SAND CLAY GRAVEL":"Sand Clay Gravel",
-                "SAND CLAY SILT":"Sand Clay Silt",
-                "SAND GRAVEL CLAY":"Sand Gravel Clay",
-                "SAND GRAVEL SILT":"Sand Gravel Silt",
-                "SAND SILT CLAY":"Sand Silt Clay",
-                "SAND SILT GRAVEL":"Sand Silt Gravel",
-                "SANDSTONE":"Sandstone",
-                "SANDSTONE & LIMESTONE":"Sandstone & Limestone",
-                "SANDSTONE & SHALE":"Sandstone & Shale",
-                "SCHIST":"Schist",
-                "SEE COMMENTS":"See Comments",
-                "SHALE":"Shale",
-                "SHALE & COAL":"Shale & Coal",
-                "SHALE & LIMESTONE":"Shale & Limestone",
-                "SHALE & SANDSTONE":"Shale & Sandstone",
-                "SHALE SANDSTONE LIMESTONE":"Shale Sandstone Limestone",
-                "SILT":"Silt",
-                "SILT & BOULDERS":"Silt & Boulders",
-                "SILT & CLAY":"Silt & Clay",
-                "SILT & COBBLES":"Silt & Cobbles",
-                "SILT & GRAVEL":"Silt & Gravel",
-                "SILT & SAND":"Silt & Sand",
-                "SILT & STONES":"Silt & Stones",
-                "SILT CLAY GRAVEL":"Silt Clay Gravel",
-                "SILT CLAY SAND":"Silt Clay Sand",
-                "SILT GRAVEL CLAY":"Silt Gravel Clay",
-                "SILT GRAVEL SAND":"Silt Gravel Sand",
-                "SILT SAND CLAY":"Silt Sand Clay",
-                "SILT SAND GRAVEL":"Silt Sand Gravel",
-                "SLATE":"Slate",
-                "SOAPSTONE (TALC)":"Soapstone (Talc)",
-                "STONES":"Stones",
-                "TOPSOIL":"Topsoil",
-                "UNIDENTIFIED CONSOLIDATED FM":"Unidentified Consolidated Fm",
-                "UKNOWN":"Unknown",
-                "VOID":"Void"}
-    for code in primDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "PrimaryLith", code, primDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "SecondaryLith", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    secDict = {"CLAYEY":"Clayey",
-               "DOLOMITIC":"Dolomitic",
-               "FILL":"Fill",
-               "GRAVELY":"Gravely",
-               "ORGANIC":"Organic",
-               "SANDY":"Sandy",
-               "SILTY":"Silty",
-               "STONEY":"Stoney",
-               "W/BOULDERS":"With Boulders",
-               "W/CLAY":"With Clay",
-               "W/COAL":"With Coal",
-               "W/COBBLES":"With Cobbles",
-               "W/DOLOMITE":"With Dolomite",
-               "W/GRAVEL":"With Gravel",
-               "W/GYPSUM":"With Gypsum",
-               "W/LIMESTONE":"With Limestone",
-               "W/PYRITE":"With Pyrite",
-               "W/SAND":"With Sand",
-               "W/SANDSTONE":"With Sandstone",
-               "W/SHALE":"With Shale",
-               "W/SILT":"With Silt",
-               "W/STONES":"With Stones",
-               "WOOD":"Wood"}
-    for code in secDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "SecondaryLith", code, secDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Simplified", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    simpDict = {"UNK":"Unknown Sediment Type",
-                "FINE":"Fine-Grained Sediments",
-                "COARSE":"Coarse-Grained Sediments",
-                "MIXED":"Mixed-Grained Sediments",
-                "ORGANIC":"Organic Sediments",
-                "BEDROCK":"Bedrock Unit"}
-    for code in simpDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Simplified", code, simpDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "WellStatus", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    statDict = {"OTH":"Other",
-                "ACT":"Active",
-                "INACT":"Inactive",
-                "PLU":"Plugged/Abandoned",
-                "UNK":"Unknown"}
-    for code in statDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "WellStatus", code, statDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "TestMethod", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    testDict = {"UNK":"Unknown",
-                "OTH":"Other",
-                "AIR":"Air",
-                "BAIL":"Bailer",
-                "PLUGR":"Plunger",
-                "TSTPUM":"Test Pump"}
-    for code in testDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "TestMethod", code, testDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Texture", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    textDict = {"COARSE":"Coarse",
-                "FINE":"Fine",
-                "MEDIUM":"Medium",
-                "FINE TO COARSE":"Fine To Coarse",
-                "FINE TO MEDIUM":"Fine To Medium",
-                "MEDIUM TO COARSE":"Medium To Coarse",
-                "VERY COARSE":"Very Coarse",
-                "VERY FINE":"Very Fine",
-                "VERY FINE-COARSE":"Very Fine To Coarse",
-                "VERY FINE-FINE":"Very Fine to Fine",
-                "VERY FINE-MEDIUM":"Very Fine To Medium"}
-    for code in textDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Texture", code, textDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Verification", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    verDict = {"Y":"Yes",
-               "N":"No"}
-    for code in verDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Verification", code, verDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "WellAquifer", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    wAQDict = {"DRIFT":"Drift Aquifer",
-               "ROCK":"Bedrock Aquifer",
-               "UNK":"Unknown Aquifer",
-               "DRYHOL":"Dry Hole"}
-    for code in wAQDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "WellAquifer", code, wAQDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "WellType", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    wellTDict = {"OTH":"Other",
-                 "HEATP":"Heat Pump",
-                 "HOSHLD":"Household",
-                 "INDUS":"Industrial",
-                 "IRRI":"Irrigation",
-                 "TESTW":"Test Well",
-                 "TY1PU":"Type I Public Supply",
-                 "TY2PU":"Type II Public Supply",
-                 "TY3PU":"Type III Public Supply",
-                 "HEATRE":"Heat Pump: Return",
-                 "HEATSU":"Heat Pump: Supply"}
-    for code in wellTDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "WellType", code, wellTDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "Age", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    ageDict = {"UNK":"Unknown Age",
-               "PH-CEN-PLEI":"Pleistocene",
-               "PH-MES-MJUR":"Middle Jurassic",
-               "PH-PAL-LPEN":"Late Pennsylvanian",
-               "PH-PAL-EPEN":"Early Pennsylvanian",
-               "PH-PAL-EPLM":"Early Pennsylvanian to Late Mississippian",
-               "PH-PAL-LMIS":"Late Mississippian",
-               "PH-PAL-EMIS":"Late Mississippian",
-               "PH-PAL-LDEV":"Late Devonian",
-               "PH-PAL-MDLD":"Late to Middle Devonian",
-               "PH-PAL-MDEV":"Middle Devonian",
-               "PH-PAL-EDEV":"Early Devonian",
-               "PH-PAL-LSIL":"Late Silurian",
-               "PH-PAL-MSIL":"Middle Silurian",
-               "PH-PAL-ESIL":"Early Silurian",
-               "PH-PAL-LORD":"Late Ordovician",
-               "PH-PAL-MORD":"Middle Ordovician",
-               "PH-PAL-EORD":"Early Ordovician",
-               "PH-PAL-LCAM":"Late Cambrian",
-               "PC-PRO-EARL":"Early Proterozoic",
-               "PC-PRO-MIDL":"Middle Proterozoic",
-               "PC":"Precambrian Age",
-               "PC-ARC-EARL":"Early Archean",
-               "PC-ARC-LATE":"Late Archean",
-               "PC-PRO-MESO":"Mesoproterozoic",
-               "PH-PAL-MDLS":"Middle Devonian to Late Silurian"}
-    for code in ageDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "Age", code, ageDict[code])
-    arcpy.management.CreateDomain(geologyLoc, "CasingType", "Group names for all formations found in Michigan", "TEXT",
-                                  "CODED")
-    caseDict = {"OTH":"Other",
-                "UNK":"Unknown",
-                "PVCPLA":"PVC Plastic",
-                "STEBLA":"Steel: Black",
-                "STEGAL":"Steel: Galvanized",
-                "STEUNK":"Steel: Unknown",
-                "NONE":"No Casing"}
-    for code in caseDict:
-        arcpy.management.AddCodedValueToDomain(geologyLoc, "CasingType", code, caseDict[code])
+    if "Color" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Color", "Accepted color terms from Wellogic","TEXT", "CODED")
+        colorDict = {"BLACK":"Black",
+                     "BLACK & GRAY":"Black & Gray",
+                     "BLUE":"Blue",
+                     "BROWN":"Brown",
+                     "CREAM": "Cream",
+                     "GRAY":"Gray",
+                     "GREEN":"Green",
+                     "ORANGE":"Orange",
+                     "PINK":"Pink",
+                     "RED":"Red",
+                     "RUST":"Rust",
+                     "TAN":"Tan",
+                     "WHITE":"White",
+                     "BLACK & WHITE":"Black & White",
+                     "DARK GRAY":"Dark Gray",
+                     "GRAY & WHITE":"Gray & White",
+                     "LIGHT BROWN":"Light Brown",
+                     "LIGHT GRAY":"Light Gray",
+                     "TAN & GRAY":"Tan & Gray",
+                     "YELLOW":"Yellow"}
+        for code in colorDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Color", code, colorDict[code])
+    if "Consistency" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Consistency", "Accepted consistency terms from Wellogic", "TEXT", "CODED")
+        consiDict = {"DENSE": "Dense",
+                     "DRY": "Dry",
+                     "GUMMY": "Gummy",
+                     "KARST":"Karst",
+                     "POROUS":"Porous",
+                     "STRIPS":"Strips",
+                     "CEMENTED":"Cemented",
+                     "VERY HARD":"Very Hard",
+                     "BROKEN":"Broken",
+                     "FRACTURED":"Fractured",
+                     "HEAVING/QUICK":"Heaving/Quick",
+                     "STRINGERS":"Stringers",
+                     "SWELLING":"Swelling",
+                     "WATER BEARING":"Water Bearing",
+                     "WEATHERED":"Weathered",
+                     "WET/MOIST":"Wet/Moist",
+                     "FIRM":"Firm",
+                     "HARD":"Hard",
+                     "SOFT":"Soft"}
+        for code in consiDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Consistency", code, consiDict[code])
+    if "Drilling" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Drilling", "Accepted drilling method terms from Wellogic", "TEXT",
+                                      "CODED")
+        drillDict = {"OTH":"Other",
+                     "AUGBOR":"Auger/Bored",
+                     "CABTOO":"Cable Tool",
+                     "CASHAM":"Casing Hammer",
+                     "DRIVEN":"Driven Hand",
+                     "HOLROD":"Hollow Rod",
+                     "JETTIN":"Jetted",
+                     "TOOHAM":"Cable Tool w/Casing Hammer",
+                     "ROTARY":"Mud Rotary",
+                     "ROTHAM":"Rotary w/Casing Hammer",
+                     "UNK":"Unknown"}
+        for code in drillDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Drilling", code, drillDict[code])
+    if "FirstBDRK" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "FirstBDRK", "Definition if the unit is the first true bedrock unit in a borehole", "TEXT",
+                                      "CODED")
+        bdrkDict = {"YES":"Yes",
+                    "NO":"No",
+                    "NA":"Not Applicable"}
+        for code in bdrkDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "FirstBDRK", code, bdrkDict[code])
+    if "GroupNames" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "GroupNames","Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        groupDict = {"AGR":"Archean Granite & Gneissic",
+                     "ANT":"Antrim Shale",
+                     "AUM":"Archean Ultramafic",
+                     "AVS":"Archean Volcanic & Sedimentary",
+                     "BAY":"Bayport Limestone",
+                     "BBF":"Bois Blanc Formation",
+                     "BBG":"Burnt Bluff Group",
+                     "BDG":"Badwater Greenstone",
+                     "BED":"Bedford Shale",
+                     "BER":"Berea Sandstone & Bedford Shale",
+                     "BHD":"Big Hill Dolomite",
+                     "BIF":"Bijiki Iron Formation",
+                     "BIG":"Bass Island Group",
+                     "BLS":"Bell Shale",
+                     "BRG":"Black River Group",
+                     "CHC":"Copper Harbor Conglomerate",
+                     "CHO":"Chocolay Group",
+                     "CHS":"Cabot Head Shale",
+                     "CSM":"Collingwood Shale Member",
+                     "CWT":"Coldwater Shale",
+                     "DCF":"Dunn Creek Formation",
+                     "DDL":"Dundee Limestone",
+                     "DRG":"Detroit River Group",
+                     "ELL":"Ellsworth Shale",
+                     "ENG":"Engadine Group",
+                     "EVC":"Emperor Volcanic Complex",
+                     "FSS":"Freda Sandstone",
+                     "GDQ":"Goodrich Quartzite",
+                     "GIF":"Garden Island Formation",
+                     "GLA":"Glacial Drift",
+                     "GRF":"Grand River Formation",
+                     "HEM":"Hemlock Formation",
+                     "IIF":"Ironwood Iron Formation",
+                     "INT":"Intrusive",
+                     "JAC":"Jacobsville Sandstone",
+                     "MAC":"Mackinac Breccia",
+                     "MAR":"Marshall Formation",
+                     "MCG":"Menominee & Chocolay Groups",
+                     "MGF":"Michigamme Formation",
+                     "MIF":"Michigan Formation",
+                     "MND":"Manitoulin Dolomite",
+                     "MQG":"Manistique Group",
+                     "MUN":"Munising Formation",
+                     "NIF":"Negaunee Iron Formation",
+                     "NSF":"Nonesuch Formation",
+                     "OBF":"Oak Bluff Formation",
+                     "PAC":"Point Aux Chenes Shale",
+                     "PAF":"Palms Formation",
+                     "PDC":"Prairie Du Chien Group",
+                     "PLV":"Portage Lake Volcanics",
+                     "PRG":"Paint River Group",
+                     "QUF":"Quinnesec Formation",
+                     "QUS":"Queenston Shale",
+                     "RAD":"Randville Dolomite",
+                     "RBD":"Jurassic Red Beds",
+                     "RIF":"Riverton Iron Formation",
+                     "SAG":"Saginaw Formation",
+                     "SAL":"Salina Group",
+                     "SAQ":"Siamo Slate & Ajibik Quartzite",
+                     "SCF":"Siemens Creek Formation",
+                     "SID":"Saint Ignace Dolomite",
+                     "SSS":"Sylvania Sandstone",
+                     "STF":"Stonington Formation",
+                     "SUN":"Sunbury Shale",
+                     "TMP":"Trempealeau Formation",
+                     "TRG":"Traverse Group",
+                     "TRN":"Trenton Group",
+                     "USM":"Utica Shale Member",
+                     "PSS":"Parma Sandstone",
+                     "GRG":"Grand Rapids Group",
+                     "NSS":"Napolean Sandstone",
+                     "SBL":"Squaw Bay Limestone",
+                     "ALL":"Alpena Limestone",
+                     "AMF":"Amherstburg Formation",
+                     "LUF":"Lucas Formation",
+                     "RCL":"Rogers City Limestone",
+                     "NIA":"Niagara Group",
+                     "CAG":"Cataract Group",
+                     "RIG":"Richmond Group",
+                     "GLM":"Glenwood Member",
+                     "JSS":"Jordan Sandstone",
+                     "SPS":"Saint Peter Sandstone",
+                     "LOD":"Lodi Member",
+                     "NRS":"New Richard Sandstone",
+                     "OND":"Oneota Dolomite",
+                     "SHD":"Shakopee Dolomite",
+                     "SLM":"Saint Lawrence Member",
+                     "DSS":"Dresbach Sandstone",
+                     "ECM":"Eau Claire Member",
+                     "FRS":"Franconia Sandstone",
+                     "LSG":"Lake Superior Group",
+                     "MSS":"Mount Simon Sandstone",
+                     "PRE":"Precambrian Bedrock (Undefined)",
+                     "UNK":"Unknown Group",
+                     "AMA":"Amasa Formation"}
+        for code in groupDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "GroupNames", code, groupDict[code])
+    if "LithAgg" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "LithAgg", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        aggDict = {"UNK":"Unknown or No Record",
+                   "BDRK":"Bedrock",
+                   "CLAY":"Clay",
+                   "CLSA":"Clay & Sand",
+                   "DIAM":"Diamicton",
+                   "TOPS":"Topsoil",
+                   "GRAV":"Gravel",
+                   "FSAN":"Fine Sand",
+                   "ORGA":"Organics",
+                   "SAND":"Sand",
+                   "SAGR":"Sand & Gravel"}
+        for code in aggDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "LithAgg", code, aggDict[code])
+    if "LithAquifer" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "LithAquifer", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        lAQDict = {"D-AQ":"Drift: Aquifer Material",
+                   "D-MAQ":"Drift: Marginal Aquifer Material",
+                   "D-CM":"Drift: Confining Material",
+                   "D-PCM":"Drift: Partially Confining Material",
+                   "R-AQ":"Bedrock: Aquifer Material",
+                   "R-MAQ":"Bedrock: Marginal Aquifer Material",
+                   "R-CM":"Bedrock: Confining Material",
+                   "R-PCM":"Bedrock: Partially Confining Material",
+                   "D-NA":"Drift: Unknown Material",
+                   "R-NA":"Bedrock: Unknown Material",
+                   "U-NA":"Unknown: Unknown Material"}
+        for code in lAQDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "LithAquifer", code, lAQDict[code])
+    if "PrimaryLith" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "PrimaryLith", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        primDict = {"BASALT":"Basalt",
+                    "BOULDERS":"Boulders",
+                    "CLAY":"Clay",
+                    "CLAY & BOULDERS":"Clay & Boulders",
+                    "CLAY & COBBLES":"Clay & Cobbles",
+                    "CLAY & GRAVEL":"Clay & Gravel",
+                    "CLAY & SAND":"Clay & Sand",
+                    "CLAY & SILT":"Clay & Silt",
+                    "CLAY & STONES":"Clay & Stones",
+                    "CLAY GRAVEL SAND":"Clay Gravel Sand",
+                    "CLAY GRAVEL SILT":"Clay Gravel Silt",
+                    "CLAY GRAVEL STONES":"Clay Gravel Stones",
+                    "CLAY SAND GRAVEL":"Clay Sand Gravel",
+                    "CLAY SAND SILT":"Clay Sand Silt",
+                    "CLAY SILT GRAVEL":"Clay Silt Gravel",
+                    "CLAY SILT SAND":"Clay Silt Sand",
+                    "COAL":"Coal",
+                    "COBBLES":"Cobbles",
+                    "CONGLOMERATE":"Conglomerate",
+                    "DEBRIS":"Debris",
+                    "DOLOMITE":"Dolomite",
+                    "DOLOMITE & LIMESTONE":"Dolomite & Limestone",
+                    "DOLOMITE & SANDSTONE":"Dolomite & Sandstone",
+                    "DOLOMITE & SHALE":"Dolomite & Shale",
+                    "DRY HOLE":"Dry Hole",
+                    "GRANITE":"Granite",
+                    "GRAVEL":"Gravel",
+                    "GRAVEL & BOULDERS":"Gravel & Boulders",
+                    "GRAVEL & CLAY":"Gravel & Clay",
+                    "GRAVEL & COBBLES":"Gravel & Cobbles",
+                    "GRAVEL & SAND":"Gravel & Sand",
+                    "GRAVEL & SILT":"Gravel & Silt",
+                    "GRAVEL & STONES":"Gravel & Stones",
+                    "GRAVEL CLAY SAND":"Gravel Clay Sand",
+                    "GRAVEL CLAY SILT":"Gravel Clay Silt",
+                    "GRAVEL SAND CLAY":"Gravel Sand Clay",
+                    "GRAVEL SAND SILT":"Gravel Sand Silt",
+                    "GRAVEL SILT CLAY":"Gravel Silt Clay",
+                    "GRAVEL SILT SAND":"Gravel Silt Sand",
+                    "GREENSTONE":"Greenstone",
+                    "GYPSUM":"Gypsum",
+                    "HARDPAN":"Hardpan",
+                    "INTERVAL NOT SAMPLED":"Interval Not Sampled",
+                    "IRON FORMATION":"Iron Formation",
+                    "LIMESTONE":"Limestone",
+                    "LIMESTONE & DOLOMITE":"Limestone & Dolomite",
+                    "LIMESTONE & SANDSTONE":"Limestone & Sandstone",
+                    "LIMESTONE & SHALE":"Limestone & Shale",
+                    "LITHOLOGY UNKNOWN":"Lithology Unknown",
+                    "LOAM":"Loam",
+                    "MARL":"Marl",
+                    "MUCK":"Muck",
+                    "MUD":"Mud",
+                    "NO LITHOLOGY INFORMATION":"No Lithology Information",
+                    "NO LOG":"No Log",
+                    "PEAT":"Peat",
+                    "QUARTZ":"Quartz",
+                    "QUARTZITE":"Quartzite",
+                    "SAND":"Sand",
+                    "SAND & BOULDERS":"Sand & Boulders",
+                    "SAND & CLAY":"Sand & Clay",
+                    "SAND & COBBLES":"Sand & Cobbles",
+                    "SAND & GRAVEL":"Sand & Gravel",
+                    "SAND & SILT":"Sand & Silt",
+                    "SAND & STONES":"Sand & Stones",
+                    "SAND CLAY GRAVEL":"Sand Clay Gravel",
+                    "SAND CLAY SILT":"Sand Clay Silt",
+                    "SAND GRAVEL CLAY":"Sand Gravel Clay",
+                    "SAND GRAVEL SILT":"Sand Gravel Silt",
+                    "SAND SILT CLAY":"Sand Silt Clay",
+                    "SAND SILT GRAVEL":"Sand Silt Gravel",
+                    "SANDSTONE":"Sandstone",
+                    "SANDSTONE & LIMESTONE":"Sandstone & Limestone",
+                    "SANDSTONE & SHALE":"Sandstone & Shale",
+                    "SCHIST":"Schist",
+                    "SEE COMMENTS":"See Comments",
+                    "SHALE":"Shale",
+                    "SHALE & COAL":"Shale & Coal",
+                    "SHALE & LIMESTONE":"Shale & Limestone",
+                    "SHALE & SANDSTONE":"Shale & Sandstone",
+                    "SHALE SANDSTONE LIMESTONE":"Shale Sandstone Limestone",
+                    "SILT":"Silt",
+                    "SILT & BOULDERS":"Silt & Boulders",
+                    "SILT & CLAY":"Silt & Clay",
+                    "SILT & COBBLES":"Silt & Cobbles",
+                    "SILT & GRAVEL":"Silt & Gravel",
+                    "SILT & SAND":"Silt & Sand",
+                    "SILT & STONES":"Silt & Stones",
+                    "SILT CLAY GRAVEL":"Silt Clay Gravel",
+                    "SILT CLAY SAND":"Silt Clay Sand",
+                    "SILT GRAVEL CLAY":"Silt Gravel Clay",
+                    "SILT GRAVEL SAND":"Silt Gravel Sand",
+                    "SILT SAND CLAY":"Silt Sand Clay",
+                    "SILT SAND GRAVEL":"Silt Sand Gravel",
+                    "SLATE":"Slate",
+                    "SOAPSTONE (TALC)":"Soapstone (Talc)",
+                    "STONES":"Stones",
+                    "TOPSOIL":"Topsoil",
+                    "UNIDENTIFIED CONSOLIDATED FM":"Unidentified Consolidated Fm",
+                    "UKNOWN":"Unknown",
+                    "VOID":"Void"}
+        for code in primDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "PrimaryLith", code, primDict[code])
+    if "SecondaryLith" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "SecondaryLith", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        secDict = {"CLAYEY":"Clayey",
+                   "DOLOMITIC":"Dolomitic",
+                   "FILL":"Fill",
+                   "GRAVELY":"Gravely",
+                   "ORGANIC":"Organic",
+                   "SANDY":"Sandy",
+                   "SILTY":"Silty",
+                   "STONEY":"Stoney",
+                   "W/BOULDERS":"With Boulders",
+                   "W/CLAY":"With Clay",
+                   "W/COAL":"With Coal",
+                   "W/COBBLES":"With Cobbles",
+                   "W/DOLOMITE":"With Dolomite",
+                   "W/GRAVEL":"With Gravel",
+                   "W/GYPSUM":"With Gypsum",
+                   "W/LIMESTONE":"With Limestone",
+                   "W/PYRITE":"With Pyrite",
+                   "W/SAND":"With Sand",
+                   "W/SANDSTONE":"With Sandstone",
+                   "W/SHALE":"With Shale",
+                   "W/SILT":"With Silt",
+                   "W/STONES":"With Stones",
+                   "WOOD":"Wood"}
+        for code in secDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "SecondaryLith", code, secDict[code])
+    if "Simplified" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Simplified", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        simpDict = {"UNK":"Unknown Sediment Type",
+                    "FINE":"Fine-Grained Sediments",
+                    "COARSE":"Coarse-Grained Sediments",
+                    "MIXED":"Mixed-Grained Sediments",
+                    "ORGANIC":"Organic Sediments",
+                    "BEDROCK":"Bedrock Unit"}
+        for code in simpDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Simplified", code, simpDict[code])
+    if "WellStatus" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "WellStatus", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        statDict = {"OTH":"Other",
+                    "ACT":"Active",
+                    "INACT":"Inactive",
+                    "PLU":"Plugged/Abandoned",
+                    "UNK":"Unknown"}
+        for code in statDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "WellStatus", code, statDict[code])
+    if "TestMethod" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "TestMethod", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        testDict = {"UNK":"Unknown",
+                    "OTH":"Other",
+                    "AIR":"Air",
+                    "BAIL":"Bailer",
+                    "PLUGR":"Plunger",
+                    "TSTPUM":"Test Pump"}
+        for code in testDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "TestMethod", code, testDict[code])
+    if "Texture" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Texture", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        textDict = {"COARSE":"Coarse",
+                    "FINE":"Fine",
+                    "MEDIUM":"Medium",
+                    "FINE TO COARSE":"Fine To Coarse",
+                    "FINE TO MEDIUM":"Fine To Medium",
+                    "MEDIUM TO COARSE":"Medium To Coarse",
+                    "VERY COARSE":"Very Coarse",
+                    "VERY FINE":"Very Fine",
+                    "VERY FINE-COARSE":"Very Fine To Coarse",
+                    "VERY FINE-FINE":"Very Fine to Fine",
+                    "VERY FINE-MEDIUM":"Very Fine To Medium"}
+        for code in textDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Texture", code, textDict[code])
+    if "Verification" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Verification", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        verDict = {"Y":"Yes",
+                   "N":"No"}
+        for code in verDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Verification", code, verDict[code])
+    if "WellAquifer" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "WellAquifer", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        wAQDict = {"DRIFT":"Drift Aquifer",
+                   "ROCK":"Bedrock Aquifer",
+                   "UNK":"Unknown Aquifer",
+                   "DRYHOL":"Dry Hole"}
+        for code in wAQDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "WellAquifer", code, wAQDict[code])
+    if "WellType" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "WellType", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        wellTDict = {"OTH":"Other",
+                     "HEATP":"Heat Pump",
+                     "HOSHLD":"Household",
+                     "INDUS":"Industrial",
+                     "IRRI":"Irrigation",
+                     "TESTW":"Test Well",
+                     "TY1PU":"Type I Public Supply",
+                     "TY2PU":"Type II Public Supply",
+                     "TY3PU":"Type III Public Supply",
+                     "HEATRE":"Heat Pump: Return",
+                     "HEATSU":"Heat Pump: Supply"}
+        for code in wellTDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "WellType", code, wellTDict[code])
+    if "Age" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "Age", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        ageDict = {"UNK":"Unknown Age",
+                   "PH-CEN-PLEI":"Pleistocene",
+                   "PH-MES-MJUR":"Middle Jurassic",
+                   "PH-PAL-LPEN":"Late Pennsylvanian",
+                   "PH-PAL-EPEN":"Early Pennsylvanian",
+                   "PH-PAL-EPLM":"Early Pennsylvanian to Late Mississippian",
+                   "PH-PAL-LMIS":"Late Mississippian",
+                   "PH-PAL-EMIS":"Late Mississippian",
+                   "PH-PAL-LDEV":"Late Devonian",
+                   "PH-PAL-MDLD":"Late to Middle Devonian",
+                   "PH-PAL-MDEV":"Middle Devonian",
+                   "PH-PAL-EDEV":"Early Devonian",
+                   "PH-PAL-LSIL":"Late Silurian",
+                   "PH-PAL-MSIL":"Middle Silurian",
+                   "PH-PAL-ESIL":"Early Silurian",
+                   "PH-PAL-LORD":"Late Ordovician",
+                   "PH-PAL-MORD":"Middle Ordovician",
+                   "PH-PAL-EORD":"Early Ordovician",
+                   "PH-PAL-LCAM":"Late Cambrian",
+                   "PC-PRO-EARL":"Early Proterozoic",
+                   "PC-PRO-MIDL":"Middle Proterozoic",
+                   "PC":"Precambrian Age",
+                   "PC-ARC-EARL":"Early Archean",
+                   "PC-ARC-LATE":"Late Archean",
+                   "PC-PRO-MESO":"Mesoproterozoic",
+                   "PH-PAL-MDLS":"Middle Devonian to Late Silurian"}
+        for code in ageDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "Age", code, ageDict[code])
+    if "CasingType" in domains:
+        pass
+    else:
+        arcpy.management.CreateDomain(geologyLoc, "CasingType", "Group names for all formations found in Michigan", "TEXT",
+                                      "CODED")
+        caseDict = {"OTH":"Other",
+                    "UNK":"Unknown",
+                    "PVCPLA":"PVC Plastic",
+                    "STEBLA":"Steel: Black",
+                    "STEGAL":"Steel: Galvanized",
+                    "STEUNK":"Steel: Unknown",
+                    "NONE":"No Casing"}
+        for code in caseDict:
+            arcpy.management.AddCodedValueToDomain(geologyLoc, "CasingType", code, caseDict[code])
 except:
     AddMsgAndPrint("ERROR 001: Failed to add domains",2)
     raise SystemError
@@ -1378,8 +1432,6 @@ try:
                               field_alias="Screen Top (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="SCREEN_TO", field_type="DOUBLE",
                               field_alias="Screen Bottom (ft)")
-    arcpy.management.AddField(in_table=outWWpoints, field_name="SWL", field_type="DOUBLE",
-                              field_alias="Static Water Level (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="FLOWING", field_type="TEXT", field_length=1,
                               field_alias="Artesian Well?", field_domain="Verification")
     arcpy.management.AddField(in_table=outWWpoints, field_name="AQ_TYPE", field_type="TEXT", field_length=6,
@@ -1410,6 +1462,8 @@ try:
                               field_alias="Wellogic Elevation (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="DEM_ELEV", field_type="DOUBLE",
                               field_alias="DEM Elevation (ft)")
+    arcpy.management.AddField(in_table=outWWpoints, field_name="SWL", field_type="DOUBLE",
+                              field_alias="Static Water Level (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="DEPTH_2_BDRK", field_type="DOUBLE",
                               field_alias="Depth to Top of Bedrock (ft)")
     arcpy.management.AddField(in_table=outWWpoints, field_name="SWL_ELEV", field_type="DOUBLE",
