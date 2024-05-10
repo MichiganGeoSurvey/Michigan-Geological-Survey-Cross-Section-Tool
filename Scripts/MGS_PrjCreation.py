@@ -69,24 +69,24 @@ def firstBDRKValue(bdrkTable, origTable, relate, seq, primLith, firstBDRK):
     # Bedrock table first...
     arcpy.management.AlterField(
         in_table=bdrkStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_BDRK", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=bdrkStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_BDRK", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     # Drift Table next...
     arcpy.management.AlterField(
         in_table=drftStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_DRFT", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=drftStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_DRFT", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     # Finally, the no records or unknown table...
     arcpy.management.AlterField(
         in_table=nrcdStatsTable, field="MAX_{}".format(seq), new_field_name="MAX_NRCD", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
     arcpy.management.AlterField(
         in_table=nrcdStatsTable, field="MIN_{}".format(seq), new_field_name="MIN_NRCD", new_field_alias="",
-        field_type="DOUBLE", field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
+        field_length=8, field_is_nullable="NULLABLE", clear_field_alias="CLEAR_ALIAS")
 
     # Now, lets join all the fields together to final lithology table...
     arcpy.management.JoinField(
