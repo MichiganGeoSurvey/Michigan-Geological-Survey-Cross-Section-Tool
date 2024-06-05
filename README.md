@@ -69,6 +69,24 @@ ArcGIS Pro toolbox containing all available MGS custom tools which include:
   - ScreensSticks_UPDATED_YYYYMMDD.lyrx  
   Function: Symbology for screen lines (Polyline)
 
+**SampleData.gdb (Zipped Folder)**
+
+Sample set of data for testing the cross-section tools.
+
+  - Sample_BedrockSurface  
+  Function: Sample bedrock surface raster in feet. 
+  - Sample_CrossSectionLines
+  Function: 2 sample cross-section lines with required "XSEC" and "DIRECION" fields 
+  - Sample_DEM_ft_10x10cell
+  Function: Sample elevation data in feet (10x10 cell size)
+  - Sample_GroundwaterSurface
+  Function: Sample IDW groundwater surface raster in feet.
+  - Sample_LithTable_JacksonCo
+  Function: Sample lithology table for the water wells
+  - Sample_Screens
+  Function: Sample well screens table
+  - Sample_WaterWellPoints
+  Function: Sample water well points
 
 **README.md**  
 
